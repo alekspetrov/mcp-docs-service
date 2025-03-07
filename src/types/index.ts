@@ -1,22 +1,40 @@
 /**
- * Type definitions for the MCP Documentation Service
+ * Types for the MCP Documentation Management Service
  */
 
-// Common types
-export interface FileInfo {
-  path: string;
-  name: string;
-  extension: string;
-  size: number;
-  createdAt: Date;
-  modifiedAt: Date;
-  isDirectory: boolean;
+export interface DocMetadata {
+  title: string;
+  description?: string;
+  tags?: string[];
+  lastUpdated?: string;
+  status?: "draft" | "review" | "published";
+  globs?: string[];
+  alwaysApply?: boolean;
 }
 
-export interface ParsedDocument {
+export interface DocContent {
+  metadata: DocMetadata;
   content: string;
-  metadata: Record<string, any>;
-  rawContent: string;
+  path: string;
+}
+
+export interface SearchOptions {
+  query: string;
+  tags?: string[];
+  status?: "draft" | "review" | "published";
+  directory?: string;
+}
+
+export interface DocUpdateParams {
+  path: string;
+  content?: string;
+  metadata?: Partial<DocMetadata>;
+}
+
+export interface DocCreateParams {
+  path: string;
+  content: string;
+  metadata: DocMetadata;
 }
 
 export interface MCPQueryResult {
@@ -25,71 +43,19 @@ export interface MCPQueryResult {
   error?: string;
 }
 
-export interface SearchOptions {
-  query: string;
-  directory?: string;
-  tags?: string[];
-  status?: string;
-  limit?: number;
-}
-
-export interface SearchResult {
-  path: string;
+export interface DocSummary {
   title: string;
   description?: string;
+  path: string;
+  lastUpdated?: string;
   tags?: string[];
-  status?: string;
-  relevance: number;
-  excerpt: string;
+  status?: "draft" | "review" | "published";
 }
 
-export interface AnalysisResult {
-  totalDocuments: number;
-  documentsWithDescription: number;
-  documentsWithTags: number;
-  documentsWithStatus: number;
-  healthScore: number;
-  suggestions: Suggestion[];
-  directoryStats: Record<string, DirectoryStats>;
-}
-
-export interface DirectoryStats {
+export interface DocAnalysisResult {
   documentCount: number;
-  averageWordCount: number;
-  hasReadme: boolean;
-}
-
-export interface Suggestion {
-  type: SuggestionType;
-  path?: string;
-  message: string;
-  priority: "high" | "medium" | "low";
-}
-
-export enum SuggestionType {
-  MissingDescription = "missing_description",
-  MissingTags = "missing_tags",
-  MissingStatus = "missing_status",
-  EmptyDirectory = "empty_directory",
-  MissingReadme = "missing_readme",
-  LowWordCount = "low_word_count",
-}
-
-export interface DocCreateParams {
-  path: string;
-  content: string;
-  metadata?: Record<string, any>;
-}
-
-export interface DocUpdateParams {
-  path: string;
-  content?: string;
-  metadata?: Record<string, any>;
-}
-
-// Configuration options
-export interface MCPDocsServerOptions {
-  fileExtensions?: string[];
-  createIfNotExists?: boolean;
-  debug?: boolean;
+  byStatus?: Record<string, number>;
+  byDirectory?: Record<string, number>;
+  recentlyUpdated?: DocSummary[];
+  missingDescriptions?: DocSummary[];
 }

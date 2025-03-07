@@ -2,6 +2,10 @@
  * Document Manager for handling file operations
  */
 
+import * as fs from "fs";
+import * as fsPromises from "fs/promises";
+import * as path from "path";
+
 import {
   DocContent,
   DocCreateParams,
@@ -9,34 +13,85 @@ import {
   DocSummary,
   DocUpdateParams,
   SearchOptions,
-} from "../types/index.ts";
+} from "../types/index.js";
 import {
   parseMarkdownWithFrontMatter,
   combineMetadataAndContent,
-} from "./docProcessor.ts";
+} from "./docProcessor.js";
 
 export class DocManager {
   private baseDir: string;
+  private options: {
+    createIfNotExists: boolean;
+    fileExtensions: string[];
+  };
 
-  constructor(baseDir: string = "./docs") {
+  constructor(
+    baseDir: string = "./docs",
+    options: {
+      createIfNotExists?: boolean;
+      fileExtensions?: string[];
+    } = {}
+  ) {
     this.baseDir = baseDir;
+    this.options = {
+      createIfNotExists: options.createIfNotExists ?? false,
+      fileExtensions: options.fileExtensions ?? [".md", ".mdx"],
+    };
+
+    // Initialize directory if needed
+    this.initializeDirectory();
+  }
+
+  /**
+   * Initialize the docs directory
+   */
+  private initializeDirectory(): void {
+    try {
+      // Check if directory exists
+      fs.accessSync(this.baseDir);
+      console.error(`Using existing docs directory: ${this.baseDir}`);
+    } catch (error) {
+      // Directory doesn't exist
+      if (this.options.createIfNotExists) {
+        try {
+          fs.mkdirSync(this.baseDir, { recursive: true });
+          console.error(`Created docs directory: ${this.baseDir}`);
+
+          // Create a sample README.md file in the new directory
+          const readmePath = path.join(this.baseDir, "README.md");
+          const readmeContent = `# Documentation\n\nThis directory was created by the MCP Documentation Service.\n`;
+          fs.writeFileSync(readmePath, readmeContent, "utf-8");
+          console.error(`Created sample README.md in ${this.baseDir}`);
+        } catch (createError) {
+          console.error(`Failed to create docs directory: ${createError}`);
+        }
+      } else {
+        console.error(`Docs directory doesn't exist: ${this.baseDir}`);
+        console.error("Use --create-dir option to create it automatically");
+      }
+    }
   }
 
   /**
    * List all markdown files in a directory recursively
    */
   async listMarkdownFiles(dir: string = ""): Promise<string[]> {
-    const fullDir = `${this.baseDir}/${dir}`.replace(/\/\//g, "/");
+    const fullDir = path.join(this.baseDir, dir);
     const files: string[] = [];
 
     try {
-      for await (const entry of Deno.readDir(fullDir)) {
-        const entryPath = `${dir}/${entry.name}`.replace(/^\//, "");
+      const entries = await fsPromises.readdir(fullDir, {
+        withFileTypes: true,
+      });
 
-        if (entry.isDirectory) {
+      for (const entry of entries) {
+        const entryPath = path.join(dir, entry.name).replace(/^\//, "");
+
+        if (entry.isDirectory()) {
           const subDirFiles = await this.listMarkdownFiles(entryPath);
           files.push(...subDirFiles);
-        } else if (entry.isFile && entry.name.endsWith(".md")) {
+        } else if (entry.isFile() && entry.name.endsWith(".md")) {
           files.push(entryPath);
         }
       }
@@ -50,13 +105,13 @@ export class DocManager {
   /**
    * Get document content and metadata
    */
-  async getDocument(path: string): Promise<DocContent | null> {
+  async getDocument(filePath: string): Promise<DocContent | null> {
     try {
-      const fullPath = `${this.baseDir}/${path}`.replace(/\/\//g, "/");
-      const content = await Deno.readTextFile(fullPath);
-      return parseMarkdownWithFrontMatter(path, content);
+      const fullPath = path.join(this.baseDir, filePath);
+      const content = await fsPromises.readFile(fullPath, "utf-8");
+      return parseMarkdownWithFrontMatter(filePath, content);
     } catch (error) {
-      console.error(`Error reading document ${path}:`, error);
+      console.error(`Error reading document ${filePath}:`, error);
       return null;
     }
   }
@@ -65,13 +120,17 @@ export class DocManager {
    * List directories in the docs folder
    */
   async listDirectories(dir: string = ""): Promise<string[]> {
-    const fullDir = `${this.baseDir}/${dir}`.replace(/\/\//g, "/");
+    const fullDir = path.join(this.baseDir, dir);
     const directories: string[] = [];
 
     try {
-      for await (const entry of Deno.readDir(fullDir)) {
-        if (entry.isDirectory) {
-          const dirPath = `${dir}/${entry.name}`.replace(/^\//, "");
+      const entries = await fsPromises.readdir(fullDir, {
+        withFileTypes: true,
+      });
+
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const dirPath = path.join(dir, entry.name).replace(/^\//, "");
           directories.push(dirPath);
         }
       }
@@ -99,13 +158,13 @@ export class DocManager {
       );
 
       // Ensure directory exists
-      const fullPath = `${this.baseDir}/${params.path}`.replace(/\/\//g, "/");
-      const dirPath = fullPath.substring(0, fullPath.lastIndexOf("/"));
+      const fullPath = path.join(this.baseDir, params.path);
+      const dirPath = path.dirname(fullPath);
 
-      await Deno.mkdir(dirPath, { recursive: true });
+      await fsPromises.mkdir(dirPath, { recursive: true });
 
       // Write the file
-      await Deno.writeTextFile(fullPath, fileContent);
+      await fsPromises.writeFile(fullPath, fileContent, "utf-8");
       return true;
     } catch (error) {
       console.error(`Error creating document ${params.path}:`, error);
@@ -136,8 +195,8 @@ export class DocManager {
       );
 
       // Write the file
-      const fullPath = `${this.baseDir}/${params.path}`.replace(/\/\//g, "/");
-      await Deno.writeTextFile(fullPath, fileContent);
+      const fullPath = path.join(this.baseDir, params.path);
+      await fsPromises.writeFile(fullPath, fileContent, "utf-8");
       return true;
     } catch (error) {
       console.error(`Error updating document ${params.path}:`, error);
@@ -148,13 +207,13 @@ export class DocManager {
   /**
    * Delete a document
    */
-  async deleteDocument(path: string): Promise<boolean> {
+  async deleteDocument(filePath: string): Promise<boolean> {
     try {
-      const fullPath = `${this.baseDir}/${path}`.replace(/\/\//g, "/");
-      await Deno.remove(fullPath);
+      const fullPath = path.join(this.baseDir, filePath);
+      await fsPromises.unlink(fullPath);
       return true;
     } catch (error) {
-      console.error(`Error deleting document ${path}:`, error);
+      console.error(`Error deleting document ${filePath}:`, error);
       return false;
     }
   }

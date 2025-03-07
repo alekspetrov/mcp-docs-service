@@ -2,8 +2,8 @@
  * Document Analyzer for generating insights about documentation
  */
 
-import { DocAnalysisResult, DocSummary } from "../types/index.ts";
-import { DocManager } from "./docManager.ts";
+import { DocAnalysisResult, DocSummary } from "../types/index.js";
+import { DocManager } from "./docManager.js";
 
 export class DocAnalyzer {
   private docManager: DocManager;

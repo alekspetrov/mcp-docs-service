@@ -1,1 +1,45 @@
- 
+{
+  "name": "mcp-docs-service",
+  "version": "0.1.0",
+  "description": "MCP Documentation Management Service - A Model Context Protocol implementation for documentation management",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "mcp-docs-service": "dist/cli/bin.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "test": "echo \"No tests yet\" && exit 0",
+    "start": "node dist/cli/bin.js"
+  },
+  "keywords": [
+    "mcp",
+    "documentation",
+    "cursor",
+    "claude",
+    "markdown",
+    "model-context-protocol"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^18.0.0",
+    "typescript": "^4.9.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

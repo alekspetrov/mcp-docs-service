@@ -1,0 +1,20 @@
+# Source files
+src/
+
+# Development files
+.github/
+.vscode/
+.idea/
+.git/
+.gitignore
+.DS_Store
+.env*
+*.log
+tsconfig.json
+copy-core.sh
+
+# Test files
+tests/
+__tests__/
+*.test.ts
+*.spec.ts

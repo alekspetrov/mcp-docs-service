@@ -5,68 +5,82 @@
  * It reads queries from stdin, processes them, and writes results to stdout.
  *
  * Usage:
- *   deno run --allow-read --allow-write --allow-env src/cli/index.ts
+ *   npx mcp-docs-service [options]
  */
 
-import { query } from "../index.ts";
+import { query as originalQuery } from "../index.js";
+import * as readline from "readline";
 
 /**
  * Main function to process stdin commands
  */
-async function main() {
+export async function main(
+  options: {
+    docsDir: string;
+    createIfNotExists: boolean;
+  } = {
+    docsDir: "./docs",
+    createIfNotExists: false,
+  }
+) {
   console.error("MCP Documentation Management Service started.");
+  console.error(`Using docs directory: ${options.docsDir}`);
+  if (options.createIfNotExists) {
+    console.error("Will create directory if it doesn't exist");
+  }
   console.error("Reading from stdin, writing results to stdout...");
 
-  // Create a buffer for reading lines from stdin
-  const buffer = new Uint8Array(1024);
+  // Create a custom query function that uses the specified docs directory
+  const query = (sql: string) =>
+    originalQuery(sql, {
+      docsDir: options.docsDir,
+      createIfNotExists: options.createIfNotExists,
+    });
 
-  // Read and process input
-  let input = "";
+  // Create readline interface
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    terminal: false,
+  });
 
-  while (true) {
-    // Read a chunk from stdin
-    const bytesRead = await Deno.stdin.read(buffer);
+  // Handle process termination
+  process.on("SIGINT", () => {
+    console.error("\nMCP Documentation Management Service terminated.");
+    process.exit(0);
+  });
 
-    // Exit if no more input (EOF)
-    if (bytesRead === null) {
-      break;
-    }
-
-    // Convert the bytes to a string and append to input
-    input += new TextDecoder().decode(buffer.subarray(0, bytesRead));
-
-    // Process complete lines
-    while (input.includes("\n")) {
-      const newlineIndex = input.indexOf("\n");
-      const line = input.slice(0, newlineIndex).trim();
-      input = input.slice(newlineIndex + 1);
-
-      if (line) {
-        try {
-          // Process the command and write the result to stdout
-          const result = await query(line);
-          console.log(JSON.stringify(result));
-        } catch (error: unknown) {
-          // Log errors to stderr and write error result to stdout
-          console.error(
-            `Error processing command: ${
-              error instanceof Error ? error.message : String(error)
-            }`
-          );
-          console.log(
-            JSON.stringify({
-              success: false,
-              error: error instanceof Error ? error.message : String(error),
-            })
-          );
-        }
+  // Process lines from stdin
+  rl.on("line", async (line) => {
+    if (line.trim()) {
+      try {
+        // Process the command and write the result to stdout
+        const result = await query(line.trim());
+        console.log(JSON.stringify(result));
+      } catch (error: unknown) {
+        // Log errors to stderr and write error result to stdout
+        console.error(
+          `Error processing command: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        console.log(
+          JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+          })
+        );
       }
     }
-  }
-}
+  });
 
-// Start the main processing loop
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  Deno.exit(1);
-});
+  // Handle end of input
+  rl.on("close", () => {
+    console.error("Input stream closed. Waiting for output to flush...");
+    // Add a delay before exiting to ensure all output is flushed
+    setTimeout(() => {
+      console.error("Exiting...");
+      process.exit(0);
+    }, 1000);
+  });
+}

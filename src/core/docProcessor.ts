@@ -2,7 +2,7 @@
  * Document processor for handling markdown files with front matter
  */
 
-import { DocContent, DocMetadata } from "../types/index.ts";
+import { DocContent, DocMetadata } from "../types/index.js";
 
 /**
  * Parses front matter and content from a markdown file

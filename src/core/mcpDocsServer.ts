@@ -3,22 +3,36 @@
  * This server implements the Model Context Protocol for managing documentation
  */
 
-import { DocManager } from "./docManager.ts";
-import { DocAnalyzer } from "./docAnalyzer.ts";
+import { DocManager } from "./docManager.js";
+import { DocAnalyzer } from "./docAnalyzer.js";
 import {
   DocCreateParams,
   DocUpdateParams,
   MCPQueryResult,
   SearchOptions,
-} from "../types/index.ts";
+} from "../types/index.js";
 
 export class MCPDocsServer {
   private docManager: DocManager;
   private docAnalyzer: DocAnalyzer;
 
-  constructor(docsDir: string = "./docs") {
-    this.docManager = new DocManager(docsDir);
+  constructor(
+    docsDir: string = "./docs",
+    options: {
+      createIfNotExists?: boolean;
+      fileExtensions?: string[];
+    } = {}
+  ) {
+    this.docManager = new DocManager(docsDir, options);
     this.docAnalyzer = new DocAnalyzer(this.docManager);
+
+    // Log initialization info
+    console.error(
+      `MCP Documentation Service initialized with docs directory: ${docsDir}`
+    );
+    if (options.createIfNotExists) {
+      console.error("Directory will be created if it doesn't exist");
+    }
   }
 
   /**
@@ -84,7 +98,7 @@ export class MCPDocsServer {
     // Extract command name
     const commandMatch = query.match(/^\s*(\w+)\s*\(/);
     if (!commandMatch) {
-      throw new Error("Invalid query format");
+      throw new Error(`Invalid query format: ${query}`);
     }
 
     const command = commandMatch[1];
@@ -102,37 +116,153 @@ export class MCPDocsServer {
     if (paramsStr.trim().startsWith("{") && paramsStr.trim().endsWith("}")) {
       try {
         return { command, params: JSON.parse(paramsStr) };
-      } catch (e) {
-        throw new Error(`Invalid JSON parameters: ${e.message}`);
+      } catch (e: unknown) {
+        throw new Error(
+          `Invalid JSON parameters: ${
+            e instanceof Error ? e.message : String(e)
+          }`
+        );
       }
     }
 
-    // Handle key=value parameters
-    const paramPairs = paramsStr.split(",");
-    for (const pair of paramPairs) {
-      const [key, ...valueParts] = pair.split("=");
-      const value = valueParts.join("=").trim();
+    // Parse key=value parameters
+    let currentKey = "";
+    let currentValue = "";
+    let inQuotes = false;
+    let inObject = false;
+    let inArray = false;
+    let objectDepth = 0;
+    let arrayDepth = 0;
 
-      if (key && value) {
-        // Handle quoted strings
-        if (
-          (value.startsWith("'") && value.endsWith("'")) ||
-          (value.startsWith('"') && value.endsWith('"'))
+    for (let i = 0; i < paramsStr.length; i++) {
+      const char = paramsStr[i];
+      const nextChar = paramsStr[i + 1] || "";
+
+      // Handle quotes
+      if (char === '"' && paramsStr[i - 1] !== "\\") {
+        inQuotes = !inQuotes;
+        currentValue += char;
+        continue;
+      }
+
+      // Handle objects
+      if (char === "{" && !inQuotes) {
+        inObject = true;
+        objectDepth++;
+        currentValue += char;
+        continue;
+      }
+
+      if (char === "}" && !inQuotes) {
+        objectDepth--;
+        if (objectDepth === 0) inObject = false;
+        currentValue += char;
+        continue;
+      }
+
+      // Handle arrays
+      if (char === "[" && !inQuotes) {
+        inArray = true;
+        arrayDepth++;
+        currentValue += char;
+        continue;
+      }
+
+      if (char === "]" && !inQuotes) {
+        arrayDepth--;
+        if (arrayDepth === 0) inArray = false;
+        currentValue += char;
+        continue;
+      }
+
+      // Handle key=value separator
+      if (
+        char === "=" &&
+        !inQuotes &&
+        !inObject &&
+        !inArray &&
+        currentKey === ""
+      ) {
+        currentKey = currentValue.trim();
+        currentValue = "";
+        continue;
+      }
+
+      // Handle parameter separator
+      if (char === "," && !inQuotes && !inObject && !inArray) {
+        if (currentKey && currentValue) {
+          // Try to parse the value
+          try {
+            if (currentValue.startsWith('"') && currentValue.endsWith('"')) {
+              // String value
+              params[currentKey] = JSON.parse(currentValue);
+            } else if (
+              currentValue.toLowerCase() === "true" ||
+              currentValue.toLowerCase() === "false"
+            ) {
+              // Boolean value
+              params[currentKey] = currentValue.toLowerCase() === "true";
+            } else if (!isNaN(Number(currentValue))) {
+              // Number value
+              params[currentKey] = Number(currentValue);
+            } else if (
+              currentValue.startsWith("[") &&
+              currentValue.endsWith("]")
+            ) {
+              // Array value
+              params[currentKey] = JSON.parse(currentValue);
+            } else if (
+              currentValue.startsWith("{") &&
+              currentValue.endsWith("}")
+            ) {
+              // Object value
+              params[currentKey] = JSON.parse(currentValue);
+            } else {
+              // Everything else as string
+              params[currentKey] = currentValue;
+            }
+          } catch (e) {
+            // If parsing fails, use as string
+            params[currentKey] = currentValue;
+          }
+        }
+        currentKey = "";
+        currentValue = "";
+        continue;
+      }
+
+      // Add character to current value
+      currentValue += char;
+    }
+
+    // Handle the last parameter
+    if (currentKey && currentValue) {
+      try {
+        if (currentValue.startsWith('"') && currentValue.endsWith('"')) {
+          // String value
+          params[currentKey] = JSON.parse(currentValue);
+        } else if (
+          currentValue.toLowerCase() === "true" ||
+          currentValue.toLowerCase() === "false"
         ) {
-          params[key.trim()] = value.slice(1, -1);
+          // Boolean value
+          params[currentKey] = currentValue.toLowerCase() === "true";
+        } else if (!isNaN(Number(currentValue))) {
+          // Number value
+          params[currentKey] = Number(currentValue);
+        } else if (currentValue.startsWith("[") && currentValue.endsWith("]")) {
+          // Array value
+          params[currentKey] = JSON.parse(currentValue);
+        } else if (currentValue.startsWith("{") && currentValue.endsWith("}")) {
+          // Object value
+          params[currentKey] = JSON.parse(currentValue);
+        } else {
+          // Everything else as string
+          params[currentKey] = currentValue;
         }
-        // Handle numbers
-        else if (!isNaN(Number(value))) {
-          params[key.trim()] = Number(value);
-        }
-        // Handle booleans
-        else if (value === "true" || value === "false") {
-          params[key.trim()] = value === "true";
-        }
-        // Everything else as string
-        else {
-          params[key.trim()] = value;
-        }
+      } catch (e) {
+        // If parsing fails, use as string
+        params[currentKey] = currentValue;
       }
     }
 
