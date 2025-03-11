@@ -9,11 +9,12 @@
     "mcp-docs-service": "dist/cli/bin.js"
   },
   "scripts": {
-    "build": "tsc && shx chmod +x dist/cli/bin.js",
+    "build": "tsc",
     "prepare": "npm run build",
     "watch": "tsc --watch",
     "test": "echo \"No tests yet\" && exit 0",
-    "start": "node dist/cli/bin.js"
+    "start": "node dist/cli/bin.js",
+    "cursor": "node dist/cursor-adapter.js"
   },
   "keywords": [
     "mcp",
@@ -27,10 +28,14 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.0",
+    "diff": "^7.0.0",
+    "glob": "^11.0.1",
     "js-yaml": "^4.1.0",
+    "minimatch": "^10.0.1",
     "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
+    "@types/diff": "^7.0.1",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.0.0",
     "shx": "^0.3.4",
