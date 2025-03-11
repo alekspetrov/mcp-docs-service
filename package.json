@@ -2,14 +2,16 @@
   "name": "mcp-docs-service",
   "version": "0.1.1",
   "description": "MCP Documentation Management Service - A Model Context Protocol implementation for documentation management",
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
     "mcp-docs-service": "dist/cli/bin.js"
   },
   "scripts": {
-    "build": "tsc",
-    "prepublishOnly": "npm run build",
+    "build": "tsc && shx chmod +x dist/cli/bin.js",
+    "prepare": "npm run build",
+    "watch": "tsc --watch",
     "test": "echo \"No tests yet\" && exit 0",
     "start": "node dist/cli/bin.js"
   },
@@ -24,12 +26,15 @@
   "author": "Aleks Petrov",
   "license": "MIT",
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "@modelcontextprotocol/sdk": "^0.5.0",
+    "js-yaml": "^4.1.0",
+    "zod-to-json-schema": "^3.23.5"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.0.0",
-    "typescript": "^4.9.0"
+    "shx": "^0.3.4",
+    "typescript": "^5.3.3"
   },
   "files": [
     "dist",

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "node",
+      "args": [
+        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/dist/cli/bin.js",
+        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
+      ]
+    }
+  }
+}

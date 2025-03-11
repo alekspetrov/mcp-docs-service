@@ -1,8 +1,0 @@
-{
-  "tasks": {
-    "start": "deno run --allow-read --allow-write --allow-env src/cli/index.ts",
-    "test": "deno test --allow-read --allow-write --allow-env tests/",
-    "build": "deno bundle src/index.ts dist/index.js"
-  },
-  "importMap": "./import_map.json"
-}

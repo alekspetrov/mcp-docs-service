@@ -1,51 +1,87 @@
 #!/usr/bin/env node
 
-/**
- * MCP Documentation Management Service CLI
- * This is the entry point for the CLI when run via npx
- */
-
-import { main } from "./index.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { MCPDocsServer } from "../server.js";
+import path from "path";
+import fs from "fs/promises";
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const options = {
-  docsDir: "./docs",
-  createIfNotExists: false,
-  help: false,
-};
-
-// Process arguments
-for (let i = 0; i < args.length; i++) {
-  const arg = args[i];
-
-  if (arg === "--docs-dir" && i + 1 < args.length) {
-    options.docsDir = args[++i];
-  } else if (arg === "--create-dir") {
-    options.createIfNotExists = true;
-  } else if (arg === "--help" || arg === "-h") {
-    options.help = true;
-  }
-}
 
 // Show help if requested
-if (options.help) {
-  console.log(`
-MCP Documentation Service
+if (args.includes("--help") || args.includes("-h")) {
+  console.error(`
+MCP Documentation Service - A Model Context Protocol implementation for documentation management
 
 Usage:
-  npx mcp-docs-service [options]
+  mcp-docs-service <docs-directory> [additional-directories...]
 
 Options:
-  --docs-dir <path>  Specify the docs directory (default: ./docs)
-  --create-dir       Create the docs directory if it doesn't exist
-  --help, -h         Show this help message
+  --help, -h          Show this help message
   `);
   process.exit(0);
 }
 
-// Start the main process
-main(options).catch((error) => {
-  console.error("Fatal error:", error);
+// Ensure at least one directory is provided
+if (args.length === 0) {
+  console.error(
+    "Error: At least one documentation directory must be specified"
+  );
+  console.error("Use --help for usage information");
+  process.exit(1);
+}
+
+// Process allowed directories
+const docsDirectories = args.map((dir) => path.resolve(process.cwd(), dir));
+
+async function validateDirectories() {
+  for (const dir of docsDirectories) {
+    try {
+      const stats = await fs.stat(dir);
+      if (!stats.isDirectory()) {
+        console.error(`Error: ${dir} is not a directory`);
+        process.exit(1);
+      }
+    } catch (error) {
+      // Create directory if it doesn't exist
+      try {
+        await fs.mkdir(dir, { recursive: true });
+        console.error(`Created directory: ${dir}`);
+      } catch (createError) {
+        console.error(
+          `Error accessing or creating directory ${dir}:`,
+          createError
+        );
+        process.exit(1);
+      }
+    }
+  }
+}
+
+async function runServer() {
+  try {
+    await validateDirectories();
+
+    console.error(`MCP Documentation Service starting...`);
+    console.error(`Docs directories: ${docsDirectories.join(", ")}`);
+
+    // Use the first directory as the primary docs dir
+    const server = new MCPDocsServer(docsDirectories[0], {
+      // All directories are pre-validated/created
+      createIfNotExists: false,
+    });
+
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+
+    console.error(`MCP Documentation Service running on stdio`);
+  } catch (error) {
+    console.error("Error starting server:", error);
+    process.exit(1);
+  }
+}
+
+runServer().catch((error) => {
+  console.error("Fatal error running server:", error);
   process.exit(1);
 });
