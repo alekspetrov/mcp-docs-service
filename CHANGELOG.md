@@ -2,6 +2,19 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.3] - 2024-03-12
+
+### Fixed
+
+- Fixed orphaned documents check in health check tool
+- Improved navigation loading from .navigation and \_navigation.json files
+- Added support for nested navigation items
+- Fixed health score calculation to properly handle orphaned documents
+
+### Added
+
+- Added navigation.json file for better documentation structure
+
 ## [0.2.2] - 2024-03-12
 
 ### Fixed

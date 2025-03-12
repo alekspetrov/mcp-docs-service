@@ -2,15 +2,14 @@
 title: MCP Docs Manager Roadmap
 description: Development roadmap and planned features for the MCP Docs Manager
 author: Claude
-date: 2023-03-13T00:00:00.000Z
+date: '2023-03-13T00:00:00.000Z'
 tags:
   - roadmap
   - planning
   - development
-status: draft
+status: published
 order: 2
 ---
-
 # MCP Docs Manager Roadmap
 
 This document outlines the development roadmap for the MCP Docs Manager service. It provides an overview of planned features, enhancements, and improvements.
@@ -55,7 +54,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 
 - 📅 **Validate Links**: Check for broken internal links
 - 📅 **Validate Metadata**: Ensure all documents have required metadata
-- 📅 **Find Orphaned Documents**: Identify documents not included in navigation
+- ✅ **Find Orphaned Documents**: Identify documents not included in navigation
 - 📅 **Find Missing References**: Identify broken references between documents
 - ✅ **Documentation Health Score**: Calculate overall documentation health score
 - 📅 **Knowledge Base Health**: Monitor and validate knowledge base completeness

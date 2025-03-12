@@ -78,9 +78,10 @@ Each issue in the `issues` array has the following structure:
 
 The overall health score is calculated based on:
 
-- Metadata completeness (40%)
+- Metadata completeness (70%)
 - No broken links (30%)
-- No orphaned documents (30%)
+
+Orphaned documents are detected but do not affect the health score. The tool will identify documents not included in navigation but will not penalize the score for them.
 
 A score of 100 indicates perfect documentation health, while lower scores indicate areas for improvement.
 

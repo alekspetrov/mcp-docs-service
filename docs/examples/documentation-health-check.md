@@ -39,6 +39,8 @@ This will perform a comprehensive health check that includes:
 - Identifying broken internal links
 - Finding orphaned documents (not included in navigation)
 
+Note that while orphaned documents are identified, they do not affect the health score calculation. The score is based on metadata completeness (70%) and broken links (30%).
+
 ## Customizing the Health Check
 
 You can customize the health check by specifying which checks to perform and which metadata fields are required:
