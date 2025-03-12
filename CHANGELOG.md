@@ -2,6 +2,20 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.4] - 2024-05-15
+
+### Fixed
+
+- Resolved orphaned documents issue by improving navigation structure
+- Enhanced documentation health check reporting
+- Updated documentation with comprehensive examples and guides
+
+### Added
+
+- Added index.md files to all documentation sections for better navigation
+- Improved documentation structure with proper navigation hierarchy
+- Added health report documentation
+
 ## [0.2.2] - 2024-03-12
 
 ### Fixed
