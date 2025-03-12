@@ -2,12 +2,19 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
-## [0.2.1] - 2023-03-12
+## [0.2.1] - 2023-03-14
 
 ### Added
 
-- Additional documentation improvements
-- Enhanced knowledge base generation capabilities
+- New MCP integration guide in `docs/guides/mcp-integration.md`
+- Test client scripts (`mcp-client.js` and `test-mcp.js`) for easier testing and debugging
+- Updated `.npmignore` to exclude test client scripts from npm package
+
+### Fixed
+
+- Fixed MCP service response format handling to properly work with the MCP SDK
+- Corrected double-wrapped response handling in client implementations
+- Improved JSON metadata parsing in command-line arguments
 
 ## [0.2.0] - 2023-03-12
 

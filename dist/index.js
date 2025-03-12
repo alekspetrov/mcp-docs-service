@@ -396,15 +396,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const tool = tools.find((t) => t.name === name);
     if (!tool) {
         return {
-            result: {
-                content: [
-                    {
-                        type: "text",
-                        text: `Tool not found: ${name}`,
-                    },
-                ],
-                isError: true,
-            },
+            content: [
+                {
+                    type: "text",
+                    text: `Tool not found: ${name}`,
+                },
+            ],
+            isError: true,
         };
     }
     try {
@@ -412,19 +410,24 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const parsedArgs = tool.schema.parse(args);
         // Call the tool handler with the appropriate type
         const result = await tool.handler(parsedArgs);
-        return { result };
+        // Ensure the content field is always an array
+        if (!result.content || !Array.isArray(result.content)) {
+            result.content = [
+                { type: "text", text: "Operation completed successfully" },
+            ];
+        }
+        return result;
     }
     catch (error) {
+        console.error(`Error executing tool ${name}:`, error);
         return {
-            result: {
-                content: [
-                    {
-                        type: "text",
-                        text: `Error calling tool ${name}: ${error.message}`,
-                    },
-                ],
-                isError: true,
-            },
+            content: [
+                {
+                    type: "text",
+                    text: `Error calling tool ${name}: ${error.message}`,
+                },
+            ],
+            isError: true,
         };
     }
 });
