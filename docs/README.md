@@ -27,6 +27,7 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 - [Guides](guides/): Detailed guides for specific topics
   - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
   - [MCP Integration](guides/mcp-integration.md): Guide for integrating with the Model Context Protocol
+  - [Cursor Integration](guides/cursor-integration.md): Guide for integrating the MCP Docs Service with Cursor
 - [Roadmap](roadmap.md): Development roadmap and planned features
 
 ## Features
@@ -42,6 +43,7 @@ The MCP Docs Manager provides tools for:
 - Analyzing documentation structure and relationships
 - Managing documentation categories and tags
 - Integrating with the Model Context Protocol (MCP)
+- Easy integration with Cursor via npx
 
 ## Contributing
 

@@ -7,6 +7,8 @@ All notable changes to the MCP Docs Service will be documented in this file.
 ### Added
 
 - New MCP integration guide in `docs/guides/mcp-integration.md`
+- New Cursor integration guide in `docs/guides/cursor-integration.md`
+- Proper CLI support for easy execution via npx
 - Test client scripts (`mcp-client.js` and `test-mcp.js`) for easier testing and debugging
 - Updated `.npmignore` to exclude test client scripts from npm package
 
@@ -15,6 +17,7 @@ All notable changes to the MCP Docs Service will be documented in this file.
 - Fixed MCP service response format handling to properly work with the MCP SDK
 - Corrected double-wrapped response handling in client implementations
 - Improved JSON metadata parsing in command-line arguments
+- Ensured proper executable permissions for CLI entry point
 
 ## [0.2.0] - 2023-03-12
 
