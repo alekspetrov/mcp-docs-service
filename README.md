@@ -21,6 +21,7 @@ Comprehensive documentation is available in the `docs` directory:
 - [Getting Started Guide](docs/guides/getting-started.md) - Introduction to the MCP Docs Manager
 - [API Overview](docs/api/overview.md) - Overview of the API and available tools
 - [Tools Reference](docs/api/tools-reference.md) - Complete reference of all available tools
+- [Features Overview](docs/features.md) - Comprehensive overview of all features
 - [Basic Usage Tutorial](docs/tutorials/basic-usage.md) - Tutorial for basic usage
 - [Examples](docs/examples/) - Code examples for common tasks
   - [Navigation Generator](docs/examples/navigation-generator.md) - Example of how to generate navigation for documentation

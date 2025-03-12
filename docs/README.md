@@ -18,6 +18,7 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
 - [API Overview](api/overview.md): Overview of the MCP Docs Manager API
 - [Tools Reference](api/tools-reference.md): Complete reference of all available tools
+- [Features Overview](features.md): Comprehensive overview of all features
 - [Tutorials](tutorials/): Step-by-step guides for common tasks
   - [Basic Usage](tutorials/basic-usage.md): Learn how to use the MCP Docs Manager for basic documentation tasks
 - [Examples](examples/): Code examples for common tasks
