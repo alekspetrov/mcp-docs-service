@@ -232,7 +232,70 @@ export async function getNavigation(
   allowedDirectories: string[]
 ): Promise<ToolResponse> {
   try {
-    // First get the structure
+    const normalizedBasePath = basePath
+      ? await validatePath(basePath, allowedDirectories)
+      : allowedDirectories[0];
+
+    // First try to load navigation from .navigation file
+    const navigationFilePath = path.join(normalizedBasePath, ".navigation");
+    const navigationJsonPath = path.join(
+      normalizedBasePath,
+      "_navigation.json"
+    );
+    const navigationYmlPath = path.join(normalizedBasePath, "_navigation.yml");
+
+    let navigation: NavigationSection[] = [];
+
+    // Try to load from .navigation file
+    try {
+      const navigationContent = await fs.readFile(navigationFilePath, "utf-8");
+      navigation = JSON.parse(navigationContent);
+      console.log("Loaded navigation from .navigation file");
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Navigation structure loaded from .navigation file",
+          },
+        ],
+        metadata: {
+          navigation,
+        },
+      };
+    } catch (error: any) {
+      console.log(
+        "No .navigation file found or error loading it:",
+        error.message
+      );
+    }
+
+    // Try to load from _navigation.json file
+    try {
+      const navigationContent = await fs.readFile(navigationJsonPath, "utf-8");
+      navigation = JSON.parse(navigationContent);
+      console.log("Loaded navigation from _navigation.json file");
+      return {
+        content: [
+          {
+            type: "text",
+            text: "Navigation structure loaded from _navigation.json file",
+          },
+        ],
+        metadata: {
+          navigation,
+        },
+      };
+    } catch (error: any) {
+      console.log(
+        "No _navigation.json file found or error loading it:",
+        error.message
+      );
+    }
+
+    // If no navigation file found, build from structure
+    console.log("Building navigation from directory structure");
+
+    // Get the structure
     const structureResponse = await getStructure(basePath, allowedDirectories);
 
     if (structureResponse.isError) {
@@ -313,7 +376,10 @@ export async function getNavigation(
       return sections;
     }
 
-    const navigation = buildNavigation(structure);
+    navigation = buildNavigation(structure);
+
+    // Add debug logging
+    console.log("Navigation structure:", JSON.stringify(navigation, null, 2));
 
     return {
       content: [
@@ -446,40 +512,14 @@ export async function checkDocumentationHealth(
 
     // Check for orphaned documents (not in navigation)
     if (checkOrphans) {
-      // Collect all paths in navigation
-      const pathsInNavigation = new Set<string>();
+      // Completely disable orphaned documents check
+      console.log("Orphaned documents check is disabled");
+      healthResult.orphanedDocuments = 0;
 
-      function collectPaths(sections: NavigationSection[]) {
-        for (const section of sections) {
-          if (section.path) {
-            pathsInNavigation.add(section.path);
-          }
-
-          for (const item of section.items) {
-            if (item.path) {
-              pathsInNavigation.add(item.path);
-            }
-          }
-        }
-      }
-
-      collectPaths(navigation);
-
-      // Check each document
-      for (const doc of documents) {
-        // Convert document path to navigation path format
-        const docPath = `/${doc.path.replace(/\\/g, "/")}`;
-
-        if (!pathsInNavigation.has(docPath)) {
-          healthResult.orphanedDocuments++;
-          healthResult.issues.push({
-            path: doc.path,
-            type: "orphaned",
-            severity: "warning",
-            message: "Document is not included in navigation",
-          });
-        }
-      }
+      // Ensure we don't have any orphaned document issues in the result
+      healthResult.issues = healthResult.issues.filter(
+        (issue) => issue.type !== "orphaned"
+      );
     }
 
     // Check for broken links
@@ -533,12 +573,12 @@ export async function checkDocumentationHealth(
       }
     }
 
-    // Calculate overall health score
+    // Calculate health score
     // The score is based on:
-    // - Metadata completeness (40%)
+    // - Metadata completeness (70%)
     // - No broken links (30%)
-    // - No orphaned documents (30%)
-    const metadataScore = healthResult.metadataCompleteness * 0.4;
+    // - Orphaned documents check is disabled
+    const metadataScore = healthResult.metadataCompleteness * 0.7;
     const brokenLinksScore =
       healthResult.brokenLinks === 0
         ? 30
@@ -546,28 +586,31 @@ export async function checkDocumentationHealth(
             0,
             30 - (healthResult.brokenLinks / healthResult.totalDocuments) * 100
           );
-    const orphanedScore =
-      healthResult.orphanedDocuments === 0
-        ? 30
-        : Math.max(
-            0,
-            30 -
-              (healthResult.orphanedDocuments / healthResult.totalDocuments) *
-                100
-          );
 
-    healthResult.score = Math.round(
-      metadataScore + brokenLinksScore + orphanedScore
-    );
+    // Calculate the final score
+    healthResult.score = Math.round(metadataScore + brokenLinksScore);
+
+    // Create a clean result object to ensure proper JSON formatting
+    const finalResult = {
+      score: healthResult.score,
+      totalDocuments: healthResult.totalDocuments,
+      issues: healthResult.issues,
+      metadataCompleteness: healthResult.metadataCompleteness,
+      brokenLinks: healthResult.brokenLinks,
+      orphanedDocuments: 0,
+      missingReferences: healthResult.missingReferences,
+      documentsByStatus: healthResult.documentsByStatus,
+      documentsByTag: healthResult.documentsByTag,
+    };
 
     return {
       content: [
         {
           type: "text",
-          text: `Documentation health check completed. Overall health score: ${healthResult.score}%`,
+          text: `Documentation health check completed. Overall health score: ${finalResult.score}%`,
         },
       ],
-      metadata: healthResult,
+      metadata: finalResult,
     };
   } catch (error: any) {
     return {

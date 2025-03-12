@@ -377,6 +377,45 @@ const documentationTools = [
             }
         },
     },
+    // Check documentation health - checks the health of documentation
+    {
+        name: "check_documentation_health",
+        description: "Check the health of documentation and identify issues",
+        schema: ToolSchemas.CheckDocumentationHealthSchema,
+        handler: async (args) => {
+            try {
+                // If basePath is provided, validate it
+                let validatedBasePath = "";
+                if (args.basePath) {
+                    try {
+                        validatedBasePath = await validatePath(args.basePath, allowedDirectories);
+                    }
+                    catch (error) {
+                        // If validation fails, use the first allowed directory
+                        console.warn(`Warning: Invalid basePath "${args.basePath}". Using default directory instead.`);
+                        validatedBasePath = allowedDirectories[0];
+                    }
+                }
+                return await DocsHandlers.checkDocumentationHealth(validatedBasePath, {
+                    checkLinks: args.checkLinks,
+                    checkMetadata: args.checkMetadata,
+                    checkOrphans: args.checkOrphans,
+                    requiredMetadataFields: args.requiredMetadataFields,
+                }, allowedDirectories);
+            }
+            catch (error) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Error checking documentation health: ${error.message}`,
+                        },
+                    ],
+                    isError: true,
+                };
+            }
+        },
+    },
 ];
 // Combine all tools
 const tools = [...documentationTools];

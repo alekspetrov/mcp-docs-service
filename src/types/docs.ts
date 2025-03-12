@@ -40,6 +40,7 @@ export interface NavigationItem {
   title: string;
   path: string | null;
   order: number;
+  items?: NavigationItem[];
 }
 
 /**
