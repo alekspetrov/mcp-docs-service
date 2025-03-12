@@ -196,7 +196,7 @@ The following metadata fields are supported:
 Now that you're familiar with the basics of MCP Docs Manager, you can:
 
 - Explore the [API Overview](../api/overview.md) for more details on available tools
-- Check out the [Tutorials](../tutorials/) for step-by-step guides
+- Check out the [Tutorials](../tutorials/basic-usage.md) for step-by-step guides
 - Review the [Roadmap](../roadmap.md) to see planned features and enhancements
 
 ## Troubleshooting
@@ -207,4 +207,4 @@ If you encounter issues with the MCP Docs Manager:
 2. Check that your markdown files have valid frontmatter
 3. Verify that the MCP Docs Manager service is running
 
-For more help, please refer to the [Troubleshooting Guide](troubleshooting.md) or open an issue in the repository.
+For more help, please open an issue in the repository.

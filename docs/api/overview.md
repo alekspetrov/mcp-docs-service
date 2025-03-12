@@ -87,4 +87,4 @@ For more detailed information on using the MCP Docs Manager API, check out:
 
 - [Complete Tools Reference](tools-reference.md)
 - [Getting Started Guide](../guides/getting-started.md)
-- [Tutorials](../tutorials/) for step-by-step guides
+- [Tutorials](../tutorials/basic-usage.md) for step-by-step guides

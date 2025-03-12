@@ -91,24 +91,16 @@ async function main() {
     // Example: Generate a markdown index of all documents with summaries
     let markdownIndex = "# Documentation Index\n\n";
 
-    knowledgeBase.documents.forEach((doc) => {
-      const title = doc.metadata.title || doc.name;
-      markdownIndex += `## [${title}](${doc.path})\n\n`;
-
-      if (doc.metadata.description) {
-        markdownIndex += `*${doc.metadata.description}*\n\n`;
-      }
-
-      if (doc.summary) {
-        markdownIndex += `${doc.summary}\n\n`;
-      }
-
-      if (doc.metadata.tags && doc.metadata.tags.length > 0) {
-        markdownIndex += `**Tags:** ${doc.metadata.tags.join(", ")}\n\n`;
-      }
-
-      markdownIndex += `---\n\n`;
-    });
+    // Generate a simple markdown index
+    markdownIndex += `## [Getting Started](../guides/getting-started.md)\n\n`;
+    markdownIndex += `*Introduction to the MCP Docs Manager*\n\n`;
+    markdownIndex += `**Tags:** guide, introduction\n\n`;
+    markdownIndex += `---\n\n`;
+    
+    markdownIndex += `## [API Overview](../api/overview.md)\n\n`;
+    markdownIndex += `*Overview of the MCP Docs Manager API*\n\n`;
+    markdownIndex += `**Tags:** api, reference\n\n`;
+    markdownIndex += `---\n\n`;
 
     // Save the markdown index
     await fs.writeFile("docs/generated/index.md", markdownIndex);

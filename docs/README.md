@@ -19,12 +19,12 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 - [API Overview](api/overview.md): Overview of the MCP Docs Manager API
 - [Tools Reference](api/tools-reference.md): Complete reference of all available tools
 - [Features Overview](features.md): Comprehensive overview of all features
-- [Tutorials](tutorials/): Step-by-step guides for common tasks
+- [Tutorials](tutorials/basic-usage.md): Step-by-step guides for common tasks
   - [Basic Usage](tutorials/basic-usage.md): Learn how to use the MCP Docs Manager for basic documentation tasks
-- [Examples](examples/): Code examples for common tasks
+- [Examples](examples/documentation-health-check.md): Code examples for common tasks
   - [Navigation Generator](examples/navigation-generator.md): Example of how to generate navigation for documentation
   - [Knowledge Base Generator](examples/knowledge-base-generator.md): Example of how to generate a comprehensive knowledge base for documentation
-- [Guides](guides/): Detailed guides for specific topics
+- [Guides](guides/getting-started.md): Detailed guides for specific topics
   - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
   - [MCP Integration](guides/mcp-integration.md): Guide for integrating with the Model Context Protocol
   - [Cursor Integration](guides/cursor-integration.md): Guide for integrating the MCP Docs Service with Cursor

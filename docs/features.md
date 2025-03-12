@@ -127,4 +127,4 @@ The MCP Docs Service is particularly useful for:
 4. **Documentation Health**: Monitor and improve documentation quality
 5. **LLM Context Optimization**: Provide efficient context for LLMs to answer documentation-related questions
 
-For more information on how to use these features, see the [Basic Usage Tutorial](tutorials/basic-usage.md) and [Examples](examples/).
+For more information on how to use these features, see the [Basic Usage Tutorial](tutorials/basic-usage.md) and [Examples](examples/documentation-health-check.md).

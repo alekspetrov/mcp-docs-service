@@ -362,7 +362,7 @@ Remember that the MCP Docs Manager provides two categories of tools:
 
 For documentation management, always prefer the documentation-specific tools as they are designed to handle markdown files with frontmatter properly.
 
-If you have any questions or need help, please refer to the [Troubleshooting Guide](troubleshooting.md) or open an issue in the repository.
+If you have any questions or need help, please open an issue in the repository.
 
 ## Troubleshooting
 
