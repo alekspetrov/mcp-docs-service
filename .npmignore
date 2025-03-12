@@ -25,3 +25,7 @@ tests/
 __tests__/
 *.test.ts
 *.spec.ts
+
+# Test client scripts
+mcp-client.js
+test-mcp.js

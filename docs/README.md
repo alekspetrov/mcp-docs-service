@@ -2,7 +2,7 @@
 title: MCP Documentation
 description: Main documentation index for the MCP Docs Manager
 author: Claude
-date: 2023-11-15
+date: 2023-11-15T00:00:00.000Z
 tags:
   - index
   - documentation
@@ -24,6 +24,9 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 - [Examples](examples/): Code examples for common tasks
   - [Navigation Generator](examples/navigation-generator.md): Example of how to generate navigation for documentation
   - [Knowledge Base Generator](examples/knowledge-base-generator.md): Example of how to generate a comprehensive knowledge base for documentation
+- [Guides](guides/): Detailed guides for specific topics
+  - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
+  - [MCP Integration](guides/mcp-integration.md): Guide for integrating with the Model Context Protocol
 - [Roadmap](roadmap.md): Development roadmap and planned features
 
 ## Features
@@ -38,6 +41,7 @@ The MCP Docs Manager provides tools for:
 - Creating comprehensive knowledge bases for LLM context
 - Analyzing documentation structure and relationships
 - Managing documentation categories and tags
+- Integrating with the Model Context Protocol (MCP)
 
 ## Contributing
 

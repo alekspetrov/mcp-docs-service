@@ -2,7 +2,7 @@
 title: MCP Docs Manager Roadmap
 description: Development roadmap and planned features for the MCP Docs Manager
 author: Claude
-date: 2023-03-13
+date: 2023-03-13T00:00:00.000Z
 tags:
   - roadmap
   - planning
@@ -26,6 +26,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - Editing and deleting documentation
 - Searching for documentation
 - Generating comprehensive knowledge bases for LLM context
+- MCP integration with proper response handling
 
 ## Planned Features
 
@@ -39,6 +40,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - ✅ **Delete Documentation**: Remove documentation files
 - ✅ **Search Documentation**: Search for documentation by content and metadata
 - ✅ **Knowledge Base Generation**: Create comprehensive knowledge bases for LLM context
+- ✅ **MCP Integration**: Proper handling of MCP response formats
 
 ### Phase 2: Enhanced Structure Management (Q3 2023)
 
@@ -106,9 +108,15 @@ The MCP Docs Manager is implemented as a TypeScript service that integrates with
    - Provide improvement suggestions
 
 5. **Search and Discovery**:
+
    - Enable content and metadata search
    - Find related documents
    - Discover documentation by tags and categories
+
+6. **MCP Integration**:
+   - Proper handling of MCP response formats
+   - Client-side extraction of double-wrapped responses
+   - Consistent error handling
 
 ## Contributing
 
