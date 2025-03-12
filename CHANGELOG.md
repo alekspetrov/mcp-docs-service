@@ -2,6 +2,15 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.2] - 2023-03-15
+
+### Added
+
+- New `check_documentation_health` tool for analyzing documentation quality
+- Documentation health score calculation based on metadata completeness, broken links, and orphaned documents
+- Detailed issue reporting for documentation problems
+- Updated documentation with examples and usage guidelines for the health check tool
+
 ## [0.2.1] - 2023-03-14
 
 ### Added

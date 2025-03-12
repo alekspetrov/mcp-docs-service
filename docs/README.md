@@ -42,6 +42,9 @@ The MCP Docs Manager provides tools for:
 - Creating comprehensive knowledge bases for LLM context
 - Analyzing documentation structure and relationships
 - Managing documentation categories and tags
+- Checking documentation health and quality
+- Identifying issues like missing metadata and broken links
+- Calculating documentation health scores
 - Integrating with the Model Context Protocol (MCP)
 - Easy integration with Cursor via npx
 

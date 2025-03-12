@@ -483,6 +483,27 @@ const documentationTools = [
       }
     },
   },
+
+  // Check documentation health - checks the health of documentation
+  {
+    name: "check_documentation_health",
+    description: "Check the health of documentation and identify issues",
+    schema: ToolSchemas.CheckDocumentationHealthSchema,
+    handler: async (
+      args: z.infer<typeof ToolSchemas.CheckDocumentationHealthSchema>
+    ) => {
+      return await DocsHandlers.checkDocumentationHealth(
+        args.basePath || "",
+        {
+          checkLinks: args.checkLinks,
+          checkMetadata: args.checkMetadata,
+          checkOrphans: args.checkOrphans,
+          requiredMetadataFields: args.requiredMetadataFields,
+        },
+        allowedDirectories
+      );
+    },
+  },
 ];
 
 // Combine all tools

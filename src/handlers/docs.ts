@@ -7,6 +7,8 @@ import {
   NavigationItem,
   NavigationSection,
   TreeEntry,
+  HealthIssue,
+  HealthCheckResult,
 } from "../types/docs.js";
 import { ToolResponse } from "../types/tools.js";
 import matter from "gray-matter";
@@ -325,6 +327,246 @@ export async function getNavigation(
     return {
       content: [
         { type: "text", text: `Error getting navigation: ${error.message}` },
+      ],
+      isError: true,
+    };
+  }
+}
+
+/**
+ * Checks the health of documentation
+ */
+export async function checkDocumentationHealth(
+  basePath: string,
+  options: {
+    checkLinks?: boolean;
+    checkMetadata?: boolean;
+    checkOrphans?: boolean;
+    requiredMetadataFields?: string[];
+  },
+  allowedDirectories: string[]
+): Promise<ToolResponse> {
+  try {
+    // Set default options
+    const checkLinks = options.checkLinks !== false;
+    const checkMetadata = options.checkMetadata !== false;
+    const checkOrphans = options.checkOrphans !== false;
+    const requiredMetadataFields = options.requiredMetadataFields || [
+      "title",
+      "description",
+      "status",
+    ];
+
+    // Get all documents
+    const docsResult = await listDocuments(basePath, allowedDirectories);
+    if (docsResult.isError) {
+      return docsResult;
+    }
+    const documents = docsResult.metadata?.documents || [];
+
+    // Get navigation if checking for orphans
+    let navigation: NavigationSection[] = [];
+    if (checkOrphans) {
+      const navResult = await getNavigation(basePath, allowedDirectories);
+      if (!navResult.isError && navResult.metadata?.navigation) {
+        navigation = navResult.metadata.navigation;
+      }
+    }
+
+    // Initialize health check result
+    const healthResult: HealthCheckResult = {
+      score: 0,
+      totalDocuments: documents.length,
+      issues: [],
+      metadataCompleteness: 0,
+      brokenLinks: 0,
+      orphanedDocuments: 0,
+      missingReferences: 0,
+      documentsByStatus: {},
+      documentsByTag: {},
+    };
+
+    // Track documents by status and tags
+    documents.forEach((doc: DocumentEntry) => {
+      // Track by status
+      if (doc.metadata?.status) {
+        const status = doc.metadata.status;
+        healthResult.documentsByStatus![status] =
+          (healthResult.documentsByStatus![status] || 0) + 1;
+      }
+
+      // Track by tags
+      if (doc.metadata?.tags && Array.isArray(doc.metadata.tags)) {
+        doc.metadata.tags.forEach((tag) => {
+          healthResult.documentsByTag![tag] =
+            (healthResult.documentsByTag![tag] || 0) + 1;
+        });
+      }
+    });
+
+    // Check metadata completeness
+    if (checkMetadata) {
+      let totalFields = 0;
+      let missingFields = 0;
+
+      for (const doc of documents) {
+        const metadata = doc.metadata || {};
+
+        for (const field of requiredMetadataFields) {
+          totalFields++;
+
+          if (!metadata[field]) {
+            missingFields++;
+            healthResult.issues.push({
+              path: doc.path,
+              type: "missing_metadata",
+              severity: "error",
+              message: `Missing required metadata field: ${field}`,
+              details: { field },
+            });
+          }
+        }
+      }
+
+      // Calculate metadata completeness percentage
+      healthResult.metadataCompleteness =
+        totalFields > 0
+          ? Math.round(((totalFields - missingFields) / totalFields) * 100)
+          : 100;
+    }
+
+    // Check for orphaned documents (not in navigation)
+    if (checkOrphans) {
+      // Collect all paths in navigation
+      const pathsInNavigation = new Set<string>();
+
+      function collectPaths(sections: NavigationSection[]) {
+        for (const section of sections) {
+          if (section.path) {
+            pathsInNavigation.add(section.path);
+          }
+
+          for (const item of section.items) {
+            if (item.path) {
+              pathsInNavigation.add(item.path);
+            }
+          }
+        }
+      }
+
+      collectPaths(navigation);
+
+      // Check each document
+      for (const doc of documents) {
+        // Convert document path to navigation path format
+        const docPath = `/${doc.path.replace(/\\/g, "/")}`;
+
+        if (!pathsInNavigation.has(docPath)) {
+          healthResult.orphanedDocuments++;
+          healthResult.issues.push({
+            path: doc.path,
+            type: "orphaned",
+            severity: "warning",
+            message: "Document is not included in navigation",
+          });
+        }
+      }
+    }
+
+    // Check for broken links
+    if (checkLinks) {
+      // Create a set of all valid document paths
+      const validPaths = new Set<string>();
+      for (const doc of documents) {
+        validPaths.add(doc.path);
+        // Also add without .md extension
+        validPaths.add(doc.path.replace(/\.md$/, ""));
+      }
+
+      // Check each document for links
+      for (const doc of documents) {
+        try {
+          const content = await fs.readFile(doc.path, "utf-8");
+
+          // Find markdown links [text](link)
+          const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+          let match;
+
+          while ((match = linkRegex.exec(content)) !== null) {
+            const link = match[2];
+
+            // Only check internal links (not external URLs)
+            if (!link.startsWith("http://") && !link.startsWith("https://")) {
+              // Resolve the link relative to the document
+              const docDir = path.dirname(doc.path);
+              const resolvedPath = path.resolve(docDir, link);
+
+              // Check if the link target exists
+              if (
+                !validPaths.has(resolvedPath) &&
+                !validPaths.has(resolvedPath + ".md")
+              ) {
+                healthResult.brokenLinks++;
+                healthResult.issues.push({
+                  path: doc.path,
+                  type: "broken_link",
+                  severity: "error",
+                  message: `Broken link: ${link}`,
+                  details: { link, linkText: match[1] },
+                });
+              }
+            }
+          }
+        } catch (error) {
+          // Skip files that can't be read
+          console.error(`Error reading file ${doc.path}:`, error);
+        }
+      }
+    }
+
+    // Calculate overall health score
+    // The score is based on:
+    // - Metadata completeness (40%)
+    // - No broken links (30%)
+    // - No orphaned documents (30%)
+    const metadataScore = healthResult.metadataCompleteness * 0.4;
+    const brokenLinksScore =
+      healthResult.brokenLinks === 0
+        ? 30
+        : Math.max(
+            0,
+            30 - (healthResult.brokenLinks / healthResult.totalDocuments) * 100
+          );
+    const orphanedScore =
+      healthResult.orphanedDocuments === 0
+        ? 30
+        : Math.max(
+            0,
+            30 -
+              (healthResult.orphanedDocuments / healthResult.totalDocuments) *
+                100
+          );
+
+    healthResult.score = Math.round(
+      metadataScore + brokenLinksScore + orphanedScore
+    );
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Documentation health check completed. Overall health score: ${healthResult.score}%`,
+        },
+      ],
+      metadata: healthResult,
+    };
+  } catch (error: any) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error checking documentation health: ${error.message}`,
+        },
       ],
       isError: true,
     };

@@ -51,3 +51,29 @@ export interface NavigationSection {
   items: NavigationItem[];
   order: number;
 }
+
+/**
+ * Health issue for documentation
+ */
+export interface HealthIssue {
+  path: string;
+  type: "missing_metadata" | "broken_link" | "orphaned" | "missing_reference";
+  severity: "error" | "warning" | "info";
+  message: string;
+  details?: any;
+}
+
+/**
+ * Health check result for documentation
+ */
+export interface HealthCheckResult {
+  score: number;
+  totalDocuments: number;
+  issues: HealthIssue[];
+  metadataCompleteness: number;
+  brokenLinks: number;
+  orphanedDocuments: number;
+  missingReferences: number;
+  documentsByStatus?: Record<string, number>;
+  documentsByTag?: Record<string, number>;
+}

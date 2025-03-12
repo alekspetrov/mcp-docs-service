@@ -336,9 +336,9 @@ Searches for markdown documents matching criteria.
 **Parameters:**
 
 - `basePath` (optional): Base path to search from
-- `query` (optional): Text to search for in document content and metadata
-- `excludePatterns` (optional): Patterns to exclude from search
-- `tags` (optional): Tags to filter by
+- `query` (optional): Search query to match against document content and metadata
+- `excludePatterns` (optional): Array of glob patterns to exclude
+- `tags` (optional): Array of tags to filter by
 - `status` (optional): Status to filter by
 
 **Example:**
@@ -346,8 +346,8 @@ Searches for markdown documents matching criteria.
 ```typescript
 const result = await mcp.callTool("docs-manager", "search_documents", {
   basePath: "docs",
-  query: "example",
-  tags: ["tutorial"],
+  query: "getting started",
+  tags: ["guide"],
   status: "published",
 });
 ```
@@ -370,6 +370,63 @@ const result = await mcp.callTool("docs-manager", "search_documents", {
   }
 }
 ```
+
+### check_documentation_health
+
+Checks the health of documentation and identifies issues.
+
+**Parameters:**
+
+- `basePath` (optional): Base path to check documentation in
+- `checkLinks` (optional): Whether to check for broken internal links (default: true)
+- `checkMetadata` (optional): Whether to check for missing metadata fields (default: true)
+- `checkOrphans` (optional): Whether to check for orphaned documents (default: true)
+- `requiredMetadataFields` (optional): List of metadata fields that should be present (default: ["title", "description", "status"])
+
+**Example:**
+
+```typescript
+const result = await mcp.callTool(
+  "docs-manager",
+  "check_documentation_health",
+  {
+    basePath: "docs",
+    checkLinks: true,
+    checkMetadata: true,
+    checkOrphans: true,
+    requiredMetadataFields: ["title", "description", "status"],
+  }
+);
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Documentation health check completed. Overall health score: X%" }
+  ],
+  metadata: {
+    score: number,              // Overall health score (0-100)
+    totalDocuments: number,     // Total number of documents checked
+    issues: Array<{
+      path: string,
+      type: 'missing_metadata' | 'broken_link' | 'orphaned' | 'missing_reference',
+      severity: 'error' | 'warning' | 'info',
+      message: string,
+      details?: any
+    }>,
+    metadataCompleteness: number, // Percentage of required metadata fields present
+    brokenLinks: number,        // Number of broken internal links
+    orphanedDocuments: number,  // Number of documents not in navigation
+    missingReferences: number,  // Number of missing references
+    documentsByStatus: Record<string, number>, // Count of documents by status
+    documentsByTag: Record<string, number>     // Count of documents by tag
+  }
+}
+```
+
+For more details, see the [Check Documentation Health](tools/check-documentation-health.md) reference.
 
 ## When to Use Each Tool
 

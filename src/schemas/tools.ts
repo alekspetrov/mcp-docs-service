@@ -55,3 +55,11 @@ export const SearchDocumentsSchema = ToolInputSchema.extend({
   tags: z.array(z.string()).optional(),
   status: z.string().optional(),
 });
+
+export const CheckDocumentationHealthSchema = ToolInputSchema.extend({
+  basePath: z.string().optional(),
+  checkLinks: z.boolean().optional(),
+  checkMetadata: z.boolean().optional(),
+  checkOrphans: z.boolean().optional(),
+  requiredMetadataFields: z.array(z.string()).optional(),
+});
