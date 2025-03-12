@@ -2,6 +2,13 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.1] - 2023-03-12
+
+### Added
+
+- Additional documentation improvements
+- Enhanced knowledge base generation capabilities
+
 ## [0.2.0] - 2023-03-12
 
 ### Added
