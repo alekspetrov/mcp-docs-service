@@ -32,6 +32,11 @@ export async function validatePath(
 ): Promise<string> {
   const normalizedPath = normalizePath(path.resolve(expandHome(p)));
 
+  // Check if the path is exactly an allowed directory
+  if (allowedDirectories.some((dir) => dir === normalizedPath)) {
+    return normalizedPath;
+  }
+
   // Check if the path is within any of the allowed directories
   const isAllowed = allowedDirectories.some((dir) => {
     const relativePath = path.relative(dir, normalizedPath);
