@@ -7,8 +7,25 @@ The MCP Documentation Service is a custom implementation of the Model Context Pr
 - **Document Management**: Create, read, update, and delete markdown documentation files
 - **Metadata Management**: Work with document frontmatter (YAML metadata)
 - **Search**: Search through documentation using keywords and filters
+- **Knowledge Base Generation**: Create comprehensive knowledge bases for LLM context
+- **Structure Analysis**: Analyze documentation structure and relationships
+- **Navigation Generation**: Generate navigation structures for documentation
+- **Tag Management**: Organize documentation by tags and categories
 - **Analytics**: Analyze documentation health and get suggestions for improvement
 - **Custom Directory Support**: Specify a custom docs directory and create it if it doesn't exist
+
+## Documentation
+
+Comprehensive documentation is available in the `docs` directory:
+
+- [Getting Started Guide](docs/guides/getting-started.md) - Introduction to the MCP Docs Manager
+- [API Overview](docs/api/overview.md) - Overview of the API and available tools
+- [Tools Reference](docs/api/tools-reference.md) - Complete reference of all available tools
+- [Basic Usage Tutorial](docs/tutorials/basic-usage.md) - Tutorial for basic usage
+- [Examples](docs/examples/) - Code examples for common tasks
+  - [Navigation Generator](docs/examples/navigation-generator.md) - Example of how to generate navigation for documentation
+  - [Knowledge Base Generator](docs/examples/knowledge-base-generator.md) - Example of how to generate a knowledge base for LLM context
+- [Roadmap](docs/roadmap.md) - Development roadmap and planned features
 
 ## Installation
 
@@ -193,21 +210,17 @@ get_document(path="architecture/overview.md")
 
 ## Available Commands
 
-### Document Operations
+### Documentation Tools
 
-- **list_files(directory="")**: List all markdown files (optionally in a specific directory)
-- **list_directories(directory="")**: List all directories (optionally in a specific directory)
-- **get_document(path="path/to/doc.md")**: Get a document's content and metadata
-- **create_document(path="path/to/doc.md", content="content", metadata={...})**: Create a new document
-- **update_document(path="path/to/doc.md", content="updated content", metadata={...})**: Update an existing document
-- **delete_document(path="path/to/doc.md")**: Delete a document
-
-### Search & Analysis
-
-- **search_documents(query="search term", directory="", tags=["tag1"], status="published")**: Search documents
-- **analyze_docs(directory="")**: Analyze documentation health
-- **get_health_score()**: Get overall documentation health score
-- **get_suggestions()**: Get suggestions for improving documentation
+- **read_document(path="path/to/doc.md")**: Read a markdown document and extract its content and metadata
+- **list_documents(basePath="")**: List all markdown documents in a directory
+- **get_structure(basePath="")**: Get the structure of the documentation directory
+- **get_navigation(basePath="")**: Get the navigation structure for the documentation
+- **get_docs_knowledge_base(basePath="", includeSummaries=true, maxSummaryLength=500)**: Create a comprehensive knowledge base of documentation for LLM context
+- **write_document(path="path/to/doc.md", content="content", metadata={...})**: Write content to a markdown document with frontmatter
+- **edit_document(path="path/to/doc.md", edits=[{oldText: "...", newText: "..."}])**: Apply edits to a markdown document while preserving frontmatter
+- **delete_document(path="path/to/doc.md")**: Delete a markdown document
+- **search_documents(basePath="", query="search term", tags=["tag1"], status="published")**: Search for markdown documents matching criteria
 
 ## License
 

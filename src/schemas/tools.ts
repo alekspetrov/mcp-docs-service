@@ -5,44 +5,6 @@ export const ToolInputSchema = z.object({
   path: z.string().optional(),
 });
 
-// File operation schemas
-export const ReadFileSchema = ToolInputSchema.extend({
-  path: z.string(),
-});
-
-export const WriteFileSchema = ToolInputSchema.extend({
-  path: z.string(),
-  content: z.string(),
-});
-
-export const ListFilesSchema = ToolInputSchema.extend({
-  path: z.string(),
-});
-
-export const GetFileInfoSchema = ToolInputSchema.extend({
-  path: z.string(),
-});
-
-export const SearchFilesSchema = ToolInputSchema.extend({
-  rootPath: z.string(),
-  pattern: z.string(),
-  excludePatterns: z.array(z.string()).optional(),
-});
-
-export const EditFileSchema = ToolInputSchema.extend({
-  path: z.string(),
-  edits: z.array(
-    z.object({
-      oldText: z.string(),
-      newText: z.string(),
-    })
-  ),
-});
-
-export const GetDirectoryTreeSchema = ToolInputSchema.extend({
-  path: z.string(),
-});
-
 // Documentation schemas
 export const ReadDocumentSchema = ToolInputSchema.extend({
   path: z.string(),
@@ -58,4 +20,38 @@ export const GetStructureSchema = ToolInputSchema.extend({
 
 export const GetNavigationSchema = ToolInputSchema.extend({
   basePath: z.string().optional(),
+});
+
+export const GetDocsKnowledgeBaseSchema = ToolInputSchema.extend({
+  basePath: z.string().optional(),
+  includeSummaries: z.boolean().optional(),
+  maxSummaryLength: z.number().optional(),
+});
+
+export const WriteDocumentSchema = ToolInputSchema.extend({
+  path: z.string(),
+  content: z.string(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const EditDocumentSchema = ToolInputSchema.extend({
+  path: z.string(),
+  edits: z.array(
+    z.object({
+      oldText: z.string(),
+      newText: z.string(),
+    })
+  ),
+});
+
+export const DeleteDocumentSchema = ToolInputSchema.extend({
+  path: z.string(),
+});
+
+export const SearchDocumentsSchema = ToolInputSchema.extend({
+  basePath: z.string().optional(),
+  query: z.string().optional(),
+  excludePatterns: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  status: z.string().optional(),
 });

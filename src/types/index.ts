@@ -1,16 +1,5 @@
 import { z } from "zod";
 
-// File and directory related types
-export interface FileInfo {
-  size: number;
-  created: Date;
-  modified: Date;
-  accessed: Date;
-  isDirectory: boolean;
-  isFile: boolean;
-  permissions: string;
-}
-
 // Documentation related types
 export interface DocumentMetadata {
   title?: string;
@@ -59,6 +48,5 @@ export type ToolResponse = {
 };
 
 // Re-export all types from specialized modules
-export * from "./file.js";
 export * from "./docs.js";
 export * from "./tools.js";

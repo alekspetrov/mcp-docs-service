@@ -12,6 +12,13 @@ src/
 *.log
 tsconfig.json
 copy-core.sh
+scripts/
+temp-publish/
+.cursor/
+.qodo/
+
+# Documentation (included separately)
+docs/
 
 # Test files
 tests/

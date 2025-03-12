@@ -17,17 +17,26 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 
 - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
 - [API Overview](api/overview.md): Overview of the MCP Docs Manager API
+- [Tools Reference](api/tools-reference.md): Complete reference of all available tools
 - [Tutorials](tutorials/): Step-by-step guides for common tasks
-  - [Working with Frontmatter](tutorials/frontmatter.md): Learn how to use frontmatter in your documentation
+  - [Basic Usage](tutorials/basic-usage.md): Learn how to use the MCP Docs Manager for basic documentation tasks
+- [Examples](examples/): Code examples for common tasks
+  - [Navigation Generator](examples/navigation-generator.md): Example of how to generate navigation for documentation
+  - [Knowledge Base Generator](examples/knowledge-base-generator.md): Example of how to generate a comprehensive knowledge base for documentation
+- [Roadmap](roadmap.md): Development roadmap and planned features
 
 ## Features
 
 The MCP Docs Manager provides tools for:
 
-- Managing documentation files with metadata
-- Searching and organizing documentation
-- Analyzing documentation health
-- Getting suggestions for improvement
+- Reading and writing documentation files with metadata (frontmatter)
+- Editing and deleting documentation
+- Searching for documentation based on content or metadata
+- Organizing documentation in a structured way
+- Generating navigation for documentation
+- Creating comprehensive knowledge bases for LLM context
+- Analyzing documentation structure and relationships
+- Managing documentation categories and tags
 
 ## Contributing
 
