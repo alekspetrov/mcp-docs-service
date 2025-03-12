@@ -10,13 +10,14 @@ export function normalizePath(p: string): string {
 }
 
 /**
- * Expands the home directory tilde (~) in a path
+ * Expands the home directory in a path (e.g., ~/docs -> /home/user/docs)
  */
-export function expandHome(filepath: string): string {
-  if (filepath.startsWith("~/") || filepath === "~") {
-    return path.join(os.homedir(), filepath.slice(1));
+export function expandHome(p: string): string {
+  if (!p) return p;
+  if (p === "~" || p.startsWith("~/")) {
+    return p.replace(/^~/, os.homedir());
   }
-  return filepath;
+  return p;
 }
 
 /**
@@ -30,6 +31,12 @@ export async function validatePath(
   p: string,
   allowedDirectories: string[]
 ): Promise<string> {
+  // Handle empty path by using the first allowed directory
+  if (!p) {
+    return allowedDirectories[0];
+  }
+
+  // Resolve the path
   const normalizedPath = normalizePath(path.resolve(expandHome(p)));
 
   // Check if the path is exactly an allowed directory
@@ -48,7 +55,32 @@ export async function validatePath(
   });
 
   if (!isAllowed) {
-    throw new Error(`Access denied: ${p} is not within allowed directories`);
+    // Try to resolve the path relative to the allowed directories
+    for (const dir of allowedDirectories) {
+      const resolvedPath = path.resolve(dir, p);
+      try {
+        // Check if the path exists
+        await fs.access(resolvedPath);
+        // If it exists, check if it's within an allowed directory
+        const relativePath = path.relative(dir, resolvedPath);
+        if (
+          relativePath !== "" &&
+          !relativePath.startsWith("..") &&
+          !path.isAbsolute(relativePath)
+        ) {
+          return resolvedPath;
+        }
+      } catch (error) {
+        // Path doesn't exist, continue to the next directory
+      }
+    }
+
+    // If we get here, the path is not allowed
+    throw new Error(
+      `Access denied: ${p} is not within allowed directories. Allowed directories: ${allowedDirectories.join(
+        ", "
+      )}`
+    );
   }
 
   return normalizedPath;

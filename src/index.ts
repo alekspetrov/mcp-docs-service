@@ -492,16 +492,45 @@ const documentationTools = [
     handler: async (
       args: z.infer<typeof ToolSchemas.CheckDocumentationHealthSchema>
     ) => {
-      return await DocsHandlers.checkDocumentationHealth(
-        args.basePath || "",
-        {
-          checkLinks: args.checkLinks,
-          checkMetadata: args.checkMetadata,
-          checkOrphans: args.checkOrphans,
-          requiredMetadataFields: args.requiredMetadataFields,
-        },
-        allowedDirectories
-      );
+      try {
+        // If basePath is provided, validate it
+        let validatedBasePath = "";
+        if (args.basePath) {
+          try {
+            validatedBasePath = await validatePath(
+              args.basePath,
+              allowedDirectories
+            );
+          } catch (error) {
+            // If validation fails, use the first allowed directory
+            console.warn(
+              `Warning: Invalid basePath "${args.basePath}". Using default directory instead.`
+            );
+            validatedBasePath = allowedDirectories[0];
+          }
+        }
+
+        return await DocsHandlers.checkDocumentationHealth(
+          validatedBasePath,
+          {
+            checkLinks: args.checkLinks,
+            checkMetadata: args.checkMetadata,
+            checkOrphans: args.checkOrphans,
+            requiredMetadataFields: args.requiredMetadataFields,
+          },
+          allowedDirectories
+        );
+      } catch (error: any) {
+        return {
+          content: [
+            {
+              type: "text",
+              text: `Error checking documentation health: ${error.message}`,
+            },
+          ],
+          isError: true,
+        };
+      }
     },
   },
 ];

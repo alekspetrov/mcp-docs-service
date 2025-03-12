@@ -42,6 +42,8 @@ const healthResult = await mcp.callTool(
 | `checkOrphans`           | boolean  | No       | `true`                               | Whether to check for orphaned documents (not in navigation)     |
 | `requiredMetadataFields` | string[] | No       | `["title", "description", "status"]` | List of metadata fields that should be present in all documents |
 
+> **Note**: If the `basePath` parameter is not provided or is invalid, the tool will automatically use the first allowed directory. This ensures the tool can always run even if the path is not explicitly specified.
+
 ## Response
 
 The tool returns a health check result with the following information:
@@ -113,3 +115,13 @@ console.log("Issues by type:", issuesByType);
 - **CI/CD Integration**: Integrate documentation health checks into your CI/CD pipeline.
 - **Documentation Audits**: Perform comprehensive audits of documentation quality.
 - **Identifying Improvement Areas**: Quickly identify areas where documentation needs improvement.
+
+## Troubleshooting
+
+If you encounter an "Access denied" error when using the `basePath` parameter, make sure:
+
+1. The path is within one of the allowed directories specified when starting the MCP service
+2. The path exists and is accessible
+3. If using a relative path, it's relative to one of the allowed directories
+
+If the path is invalid, the tool will automatically fall back to using the first allowed directory.

@@ -357,8 +357,14 @@ export async function checkDocumentationHealth(
       "status",
     ];
 
+    // Use the first allowed directory if basePath is empty
+    const effectiveBasePath = basePath || allowedDirectories[0];
+
     // Get all documents
-    const docsResult = await listDocuments(basePath, allowedDirectories);
+    const docsResult = await listDocuments(
+      effectiveBasePath,
+      allowedDirectories
+    );
     if (docsResult.isError) {
       return docsResult;
     }
@@ -367,7 +373,10 @@ export async function checkDocumentationHealth(
     // Get navigation if checking for orphans
     let navigation: NavigationSection[] = [];
     if (checkOrphans) {
-      const navResult = await getNavigation(basePath, allowedDirectories);
+      const navResult = await getNavigation(
+        effectiveBasePath,
+        allowedDirectories
+      );
       if (!navResult.isError && navResult.metadata?.navigation) {
         navigation = navResult.metadata.navigation;
       }

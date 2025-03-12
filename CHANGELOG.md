@@ -2,7 +2,20 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
-## [0.2.2] - 2023-03-15
+## [0.2.2] - 2024-03-12
+
+### Fixed
+
+- Fixed health check tool to properly access docs directory
+- Improved path validation to better handle relative paths
+- Enhanced CLI to support custom docs directory with `--docs-dir` and `--create-dir` options
+- Added better error handling and fallback for invalid paths
+
+### Added
+
+- Added troubleshooting section to health check documentation
+
+## [0.2.1] - 2023-03-15
 
 ### Added
 
@@ -11,52 +24,29 @@ All notable changes to the MCP Docs Service will be documented in this file.
 - Detailed issue reporting for documentation problems
 - Updated documentation with examples and usage guidelines for the health check tool
 
-## [0.2.1] - 2023-03-14
+## [0.2.0] - 2023-03-14
 
 ### Added
 
-- New MCP integration guide in `docs/guides/mcp-integration.md`
-- New Cursor integration guide in `docs/guides/cursor-integration.md`
-- Proper CLI support for easy execution via npx
-- Test client scripts (`mcp-client.js` and `test-mcp.js`) for easier testing and debugging
-- Updated `.npmignore` to exclude test client scripts from npm package
+- Added proper CLI support with `npx mcp-docs-service`
+- Added support for custom docs directory with `--docs-dir` option
+- Added support for creating docs directory with `--create-dir` option
+- Added Cursor integration guide
+- Added Claude Desktop integration guide
 
 ### Fixed
 
-- Fixed MCP service response format handling to properly work with the MCP SDK
-- Corrected double-wrapped response handling in client implementations
-- Improved JSON metadata parsing in command-line arguments
-- Ensured proper executable permissions for CLI entry point
+- Fixed MCP response format to comply with the latest protocol
+- Fixed path validation for Windows paths
+- Fixed error handling for invalid paths
 
-## [0.2.0] - 2023-03-12
-
-### Added
-
-- New `get_docs_knowledge_base` tool for creating comprehensive knowledge bases for LLM context
-- Knowledge base generation example in `docs/examples/knowledge-base-generator.md`
-- Support for document summaries in knowledge base
-- Organization of documents by categories and tags in knowledge base
-- Updated documentation to reflect new features
-
-### Changed
-
-- Improved documentation structure and organization
-- Updated roadmap to include knowledge base features
-- Enhanced basic usage tutorial with knowledge base examples
-- Removed unnecessary file operation tools in favor of document-specific tools
-
-### Fixed
-
-- TypeScript type errors in knowledge base implementation
-- Various documentation improvements and corrections
-
-## [0.1.1] - 2023-03-11
+## [0.1.0] - 2023-03-10
 
 ### Added
 
-- Initial release of MCP Docs Service
-- Basic documentation management functionality
-- Support for reading, writing, editing, and deleting markdown files with frontmatter
-- Search functionality for documentation
-- Navigation generation
-- Documentation structure analysis
+- Initial release with core documentation management features
+- Support for reading, writing, and editing markdown files with frontmatter
+- Support for listing documents and getting structure
+- Support for generating navigation
+- Support for searching documents
+- Support for generating knowledge bases for LLM context
