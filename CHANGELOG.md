@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.5] - 2024-03-13
+
+### Fixed
+
+- Fixed version mismatch between package.json and server configuration
+- Improved argument handling to support both positional and flag-based paths
+- Enhanced Cursor integration with better configuration examples
+
+### Changed
+
+- Updated documentation to clarify usage with Cursor
+- Simplified configuration approach for better compatibility
+
+## [0.3.4] - 2024-03-13
+
+### Fixed
+
+- Fixed version mismatch between package.json and server configuration
+- Improved argument handling to support both positional and flag-based paths
+- Enhanced Cursor integration with better configuration examples
+
+### Changed
+
+- Updated documentation to clarify usage with Cursor
+- Simplified configuration approach for better compatibility
+
 ## [0.3.2] - 2024-03-13
 
 ### Fixed

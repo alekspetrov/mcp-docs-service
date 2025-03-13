@@ -1,6 +1,6 @@
 ---
 title: Documentation Health Check Guide
-description: Guide for checking the health of your documentation using MCP Docs Service
+description: How to use the health check feature to improve your documentation
 author: Claude
 date: 2024-05-15T00:00:00.000Z
 tags:
@@ -13,170 +13,93 @@ order: 5
 
 # Documentation Health Check Guide
 
-The MCP Docs Service includes a powerful health check feature that analyzes your documentation and provides insights into its quality, completeness, and structure. This guide explains how to use this feature and interpret the results.
-
-## What Does the Health Check Analyze?
-
-The documentation health check analyzes several aspects of your documentation:
-
-1. **Metadata Completeness**: Checks if all required metadata fields (like title, description, status) are present in each document.
-2. **Broken Links**: Identifies internal links that point to non-existent documents.
-3. **Document Status**: Tracks documents by their status (e.g., draft, published, review).
-4. **Document Tags**: Analyzes the distribution of tags across your documentation.
-
-The health check calculates an overall health score based on these factors, with metadata completeness and broken links having the most significant impact on the score.
+The MCP Documentation Service includes a powerful health check feature that analyzes your documentation and provides insights into its quality, completeness, and structure.
 
 ## Running a Health Check
 
-There are several ways to run a health check on your documentation:
+### From the Command Line
 
-### 1. Using the CLI
-
-The easiest way is to use the CLI with the `--health-check` flag:
+You can run a health check directly from the command line:
 
 ```bash
-# Using npx
-npx mcp-docs-service --health-check
-
-# Or if installed globally
+# Using the globally installed version
 mcp-docs-service --health-check
 
-# Or using the npm script
-npm run health-check
+# Or using npx
+npx mcp-docs-service --health-check
 ```
 
-This will:
+### Using the MCP Tool
 
-- Start the MCP Docs Service
-- Run the health check on your documentation
-- Display the results in a readable format
-- Automatically exit when done
-
-### 2. Using the MCP Protocol Directly
-
-If you're integrating with the MCP Docs Service programmatically, you can call the health check tool directly:
-
-```javascript
-const request = {
-  jsonrpc: "2.0",
-  method: "tools/call",
-  params: {
-    name: "check_documentation_health",
-    arguments: {
-      checkLinks: true,
-      checkMetadata: true,
-      checkOrphans: true,
-      requiredMetadataFields: ["title", "description"],
-    },
-  },
-  id: Date.now(),
-};
-
-// Send this request to the MCP Docs Service
-```
-
-### 3. Using Cursor or Claude Desktop
-
-If you've integrated the MCP Docs Service with Cursor or Claude Desktop, you can ask the AI to run a health check:
+You can also run a health check using the MCP tool in Cursor:
 
 ```
-Please run a health check on my documentation and summarize the results.
+@docs-manager check_documentation_health
 ```
 
-## Understanding the Health Check Results
+## Understanding the Health Report
 
-The health check results include:
+The health check analyzes several aspects of your documentation and generates a comprehensive report with a health score and detailed issues.
 
-### Overall Health Score
+### Health Score
 
-A percentage score that indicates the overall health of your documentation. A higher score means better documentation quality.
+The health score is a number between 0 and 100 that indicates the overall quality of your documentation. A higher score means better documentation.
 
-### Metadata Completeness
+### Issues Analyzed
 
-The percentage of required metadata fields that are present across all documents. This helps identify documents with missing metadata.
+The health check looks for the following issues:
 
-### Broken Links
+1. **Missing Frontmatter**: Documents without YAML frontmatter
+2. **Missing Title**: Documents without a title in the frontmatter
+3. **Missing Description**: Documents without a description in the frontmatter
+4. **Broken Links**: Internal links that point to non-existent documents
+5. **Orphaned Documents**: Documents that are not referenced in the navigation structure
 
-The number of internal links that point to non-existent documents. These should be fixed to ensure a good user experience.
+### Example Report
 
-### Issues List
+Here's an example of a health check report:
 
-A detailed list of all issues found, including:
+```
+Documentation Health Report:
+Health Score: 85/100
 
-- Missing metadata fields
-- Broken links
-- Other issues that might affect documentation quality
+Summary:
+- Total Documents: 20
+- Documents with Missing Frontmatter: 1
+- Documents with Missing Title: 2
+- Documents with Missing Description: 3
+- Broken Links: 1
+- Orphaned Documents: 0
 
-Each issue includes:
-
-- The path to the affected document
-- The type of issue
-- A severity level (error, warning, info)
-- A detailed message explaining the issue
-
-### Document Statistics
-
-The health check also provides statistics about your documentation:
-
-- Total number of documents
-- Distribution of documents by status
-- Distribution of documents by tags
-
-## Customizing the Health Check
-
-You can customize the health check by modifying the arguments when calling it programmatically:
-
-```javascript
-{
-  // Whether to check for broken links
-  checkLinks: true,
-
-  // Whether to check for missing metadata
-  checkMetadata: true,
-
-  // Whether to check for orphaned documents (currently disabled)
-  checkOrphans: false,
-
-  // The metadata fields that are required in each document
-  requiredMetadataFields: ["title", "description", "status"]
-}
+Issues:
+- guides/setup.md: Missing frontmatter
+- api/endpoints.md: Missing title in frontmatter
+- tutorials/advanced.md: Missing title in frontmatter
+- examples/basic.md: Missing description in frontmatter
+- examples/advanced.md: Missing description in frontmatter
+- tutorials/basic.md: Missing description in frontmatter
+- api/authentication.md: Broken link to api/oauth.md
 ```
 
-## Improving Your Documentation Health
+## Improving Your Documentation
 
-Based on the health check results, here are some ways to improve your documentation:
+Based on the health check report, you can take the following actions to improve your documentation:
 
-1. **Add Missing Metadata**: Ensure all documents have the required metadata fields.
-2. **Fix Broken Links**: Update or remove links that point to non-existent documents.
-3. **Standardize Tags**: Use consistent tags across your documentation.
-4. **Update Document Status**: Make sure all documents have an appropriate status.
+1. **Add Frontmatter**: Ensure all documents have YAML frontmatter with at least title and description
+2. **Fix Broken Links**: Update or remove links that point to non-existent documents
+3. **Include Orphaned Documents**: Add references to orphaned documents in your navigation structure
 
 ## Automating Health Checks
 
-You can automate health checks by integrating the CLI command into your CI/CD pipeline or by setting up a scheduled task to run it regularly.
+You can automate health checks as part of your CI/CD pipeline to ensure documentation quality over time:
 
-For example, in a GitHub Actions workflow:
-
-```yaml
-name: Documentation Health Check
-
-on:
-  schedule:
-    - cron: "0 0 * * 1" # Run weekly on Monday
-  workflow_dispatch: # Allow manual triggering
-
-jobs:
-  health-check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-      - run: npm install
-      - run: npx mcp-docs-service --health-check
-      # Add steps to report or act on the results
+```bash
+# Example GitHub Actions workflow step
+- name: Check Documentation Health
+  run: npx mcp-docs-service --health-check
 ```
+
+If the health check fails (returns a non-zero exit code), your CI/CD pipeline will fail, ensuring that documentation issues are addressed before deployment.
 
 ## Troubleshooting
 

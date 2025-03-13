@@ -438,7 +438,7 @@ async function checkDocumentationHealth(basePath) {
 // Server setup
 const server = new Server({
     name: "mcp-docs-service",
-    version: "0.3.0",
+    version: "0.3.5",
 }, {
     capabilities: {
         tools: {},

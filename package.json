@@ -1,6 +1,6 @@
 {
   "name": "mcp-docs-service",
-  "version": "0.3.2",
+  "version": "0.3.5",
   "description": "MCP Documentation Service - A Model Context Protocol implementation for documentation management",
   "type": "module",
   "main": "dist/index.js",
@@ -19,7 +19,8 @@
     "lint": "eslint src --ext .ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "prepare-publish": "node scripts/prepare-publish.js"
   },
   "keywords": [
     "mcp",

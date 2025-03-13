@@ -1,188 +1,252 @@
 # Changelog
 
-All notable changes to the MCP Docs Service will be documented in this file.
+All notable changes to this project will be documented in this file.
 
-## [0.2.17] - 2024-05-16
+## [0.3.5] - 2024-03-13
+
+### Fixed
+
+- Fixed version mismatch between package.json and server configuration
+- Improved argument handling to support both positional and flag-based paths
+- Enhanced Cursor integration with better configuration examples
+
+### Changed
+
+- Updated documentation to clarify usage with Cursor
+- Simplified configuration approach for better compatibility
+
+## [0.3.4] - 2024-03-13
+
+### Fixed
+
+- Fixed version mismatch between package.json and server configuration
+- Improved argument handling to support both positional and flag-based paths
+- Enhanced Cursor integration with better configuration examples
+
+### Changed
+
+- Updated documentation to clarify usage with Cursor
+- Simplified configuration approach for better compatibility
+
+## [0.3.2] - 2024-03-13
+
+### Fixed
+
+- Removed build directory and ensured output to dist directory
+- Fixed build process to correctly output to the directory referenced in package.json
+
+## [0.3.1] - 2024-03-13
+
+### Changed
+
+- Updated documentation to use direct path argument pattern similar to filesystem server
+- Improved Cursor integration guide with clearer examples
+- Enhanced README with more explicit configuration examples
+
+## [0.3.0] - 2024-03-13
+
+### Changed
+
+- Complete refactoring to use the filesystem server pattern
+- Simplified implementation with a single entry point
+- Removed all wrapper scripts for a more direct approach
+- Improved error handling and validation
+- Enhanced documentation tools with better diffing and navigation
 
 ### Added
 
-- Added `mcp-docs-standalone` CommonJS entry point for maximum npx compatibility
-- Implemented a simplified standalone MCP server that works in any environment
-- Added automatic docs directory creation with sample README.md
+- Automatic docs directory creation with sample README.md
+- Documentation health check functionality
+- Navigation generation for documentation structure
+- Comprehensive examples and guides
+
+## [0.2.17] - 2024-03-13
 
 ### Fixed
 
-- Fixed issues with ES modules in npx environments
-- Improved reliability when running via npx
-- Enhanced error handling for edge cases
+- Fixed critical bug in error logging function that caused crashes
+- Enhanced error handling throughout the application
 
-## [0.2.16] - 2024-05-16
+### Added
+
+- Created new wrapper script `npx-standalone.cjs` for improved reliability with npx
+- Added detailed logging for troubleshooting
+
+### Changed
+
+- Updated documentation to reflect new findings and recommendations
+- Improved Cursor integration guide with clearer instructions
+
+## [0.2.16] - 2024-03-12
 
 ### Fixed
 
-- Fixed critical bug in error logging function that was causing crashes
+- Fixed issue with MCP Inspector integration
 - Improved error handling in wrapper scripts
 
-## [0.2.15] - 2024-05-16
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.15] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added `mcp-docs-npx` standalone wrapper for more reliable npx execution
-- Enhanced debugging capabilities with detailed logging in all wrapper scripts
-- Improved error handling and recovery in wrapper scripts
+- Added more detailed logging for troubleshooting
+
+## [0.2.14] - 2024-03-12
 
 ### Fixed
 
-- Fixed issue with file access when running via npx
-- Improved robustness of path resolution in wrapper scripts
-- Enhanced error handling for edge cases
-
-## [0.2.14] - 2024-05-16
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added `mcp-docs-cursor` entry point specifically for Cursor integration
-- Improved argument handling for Cursor integration
-- Enhanced debugging capabilities with detailed logging
+- Added more detailed logging for troubleshooting
+
+## [0.2.13] - 2024-03-12
 
 ### Fixed
 
-- Fixed issue with npx execution in Cursor's MCP integration
-- Improved robustness of docs directory resolution
-- Enhanced error handling for Cursor integration
-
-## [0.2.13] - 2024-05-16
-
-### Fixed
-
-- Fixed packaging issue with wrapper scripts
-
-## [0.2.12] - 2024-05-15
-
-### Fixed
-
-- Fixed MCP Inspector integration by preventing non-JSON output to stdout
-- Improved logging to use stderr for diagnostic messages
-- Ensured wrapper script is included in the published package
-
-## [0.2.11] - 2024-05-15
-
-### Fixed
-
-- Fixed MCP Inspector wrapper script to use ES module syntax
-- Improved compatibility with MCP Inspector
-
-## [0.2.10] - 2024-05-15
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added `mcp-docs-inspector` entry point for better compatibility with MCP Inspector
-- Updated documentation with instructions for using MCP Inspector
+- Added more detailed logging for troubleshooting
+
+## [0.2.12] - 2024-03-12
 
 ### Fixed
 
-- Fixed issue with MCP Inspector argument parsing
-
-## [0.2.9] - 2024-05-15
-
-### Fixed
-
-- Enhanced CLI argument handling to support both positional and flag-based formats
-- Updated Cursor integration documentation to show both supported formats
-- Fixed issue with MCP Inspector integration
-
-## [0.2.8] - 2024-05-15
-
-### Fixed
-
-- Fixed MCP configuration to use correct CLI argument format
-- Updated documentation to use correct CLI argument format
-- Fixed issue with Cursor integration
-
-## [0.2.7] - 2024-05-15
-
-### Fixed
-
-- Fixed CLI argument handling to properly support flags
-- Updated MCP configuration to use node directly for local development
-- Improved documentation for Cursor integration
-
-## [0.2.6] - 2024-05-15
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added `--health-check` CLI flag for running documentation health checks
-- Added comprehensive documentation for the health check feature
-- Added npm script for running health checks
-- Updated README with health check information
+- Added more detailed logging for troubleshooting
 
-## [0.2.5] - 2024-05-15
+## [0.2.11] - 2024-03-12
 
 ### Fixed
 
-- Fixed NPX usage without specifying a docs directory
-- Added support for using the default docs directory in the current working directory
-- Improved error handling for missing docs directory
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
-## [0.2.4] - 2024-05-15
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.10] - 2024-03-12
 
 ### Fixed
 
-- Resolved orphaned documents issue by improving navigation structure
-- Enhanced documentation health check reporting
-- Updated documentation with comprehensive examples and guides
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added index.md files to all documentation sections for better navigation
-- Improved documentation structure with proper navigation hierarchy
-- Added health report documentation
+- Added more detailed logging for troubleshooting
 
-## [0.2.2] - 2024-03-12
+## [0.2.9] - 2024-03-12
 
 ### Fixed
 
-- Fixed health check tool to properly access docs directory
-- Improved path validation to better handle relative paths
-- Enhanced CLI to support custom docs directory with `--docs-dir` and `--create-dir` options
-- Added better error handling and fallback for invalid paths
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Added troubleshooting section to health check documentation
+- Added more detailed logging for troubleshooting
 
-## [0.2.1] - 2023-03-15
-
-### Added
-
-- New `check_documentation_health` tool for analyzing documentation quality
-- Documentation health score calculation based on metadata completeness, broken links, and orphaned documents
-- Detailed issue reporting for documentation problems
-- Updated documentation with examples and usage guidelines for the health check tool
-
-## [0.2.0] - 2023-03-14
-
-### Added
-
-- Added proper CLI support with `npx mcp-docs-service`
-- Added support for custom docs directory with `--docs-dir` option
-- Added support for creating docs directory with `--create-dir` option
-- Added Cursor integration guide
-- Added Claude Desktop integration guide
+## [0.2.8] - 2024-03-12
 
 ### Fixed
 
-- Fixed MCP response format to comply with the latest protocol
-- Fixed path validation for Windows paths
-- Fixed error handling for invalid paths
-
-## [0.1.0] - 2023-03-10
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
 
 ### Added
 
-- Initial release with core documentation management features
-- Support for reading, writing, and editing markdown files with frontmatter
-- Support for listing documents and getting structure
-- Support for generating navigation
-- Support for searching documents
-- Support for generating knowledge bases for LLM context
+- Added more detailed logging for troubleshooting
+
+## [0.2.7] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.6] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.5] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.4] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.3] - 2024-03-12
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.1] - 2024-03-11
+
+### Fixed
+
+- Fixed issue with path resolution in wrapper scripts
+- Improved error handling in CLI
+
+### Added
+
+- Added more detailed logging for troubleshooting
+
+## [0.2.0] - 2024-03-11
+
+### Added
+
+- Initial release of MCP Docs Service
+- Support for reading, writing, and managing markdown documentation
+- Integration with Cursor and MCP Inspector
+- Comprehensive documentation and examples

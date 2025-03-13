@@ -1,6 +1,6 @@
 ---
 title: Cursor Integration Guide
-description: Guide for integrating MCP Docs Service with Cursor
+description: How to integrate the MCP Documentation Service with Cursor
 author: Claude
 date: 2024-03-12T00:00:00.000Z
 tags:
@@ -13,141 +13,104 @@ order: 3
 
 # Cursor Integration Guide
 
-This guide explains how to integrate the MCP Docs Service with Cursor to enable AI-powered documentation management.
+This guide explains how to integrate the MCP Documentation Service with Cursor IDE to enable AI-assisted documentation management.
 
-## Prerequisites
+## Setup
 
-- [Cursor](https://cursor.sh/) installed on your machine
-- A project with documentation in markdown format
+1. Install the MCP Documentation Service globally (optional):
 
-## Setting Up MCP Docs Service in Cursor
+   ```bash
+   npm install -g mcp-docs-service
+   ```
 
-To integrate MCP Docs Service with Cursor, you need to configure it in your project's `.cursor/mcp.json` file.
+   You can skip this step if you prefer to use `npx` directly.
 
-1. Create a `.cursor` directory in your project root if it doesn't exist:
+2. Create a `.cursor` directory in your project root if it doesn't exist:
 
-```bash
-mkdir -p .cursor
-```
+   ```bash
+   mkdir -p .cursor
+   ```
 
-2. Create or edit the `mcp.json` file in the `.cursor` directory:
+3. Create or edit the `.cursor/mcp.json` file with the following configuration:
 
-```bash
-touch .cursor/mcp.json
-```
+   ```json
+   {
+     "mcpServers": {
+       "docs-manager": {
+         "command": "npx",
+         "args": ["-y", "mcp-docs-service", "./docs"]
+       }
+     }
+   }
+   ```
 
-3. Add the following configuration to the `mcp.json` file:
+   This configuration specifies the `docs` directory in your project root. The docs directory path is provided directly as an argument, similar to how the filesystem MCP server works.
 
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-standalone"]
-    }
-  }
-}
-```
+## Custom Docs Directory
 
-This configuration uses the standalone CommonJS entry point which is designed for maximum compatibility with npx. It works in any environment and automatically handles docs directory creation with a sample README.md file.
-
-Alternatively, you can specify a docs directory:
+To specify a custom docs directory, simply change the path in the args array:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-standalone", "./docs"]
+      "args": ["-y", "mcp-docs-service", "./my-custom-docs"]
     }
   }
 }
 ```
 
-If you prefer to use the standard entry point:
+## Auto-Create Docs Directory
+
+To automatically create the docs directory if it doesn't exist:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-service"]
+      "args": ["-y", "mcp-docs-service", "./docs", "--create-dir"]
     }
   }
 }
 ```
 
-For specialized use cases, you can try the other entry points:
+You can also combine a custom path with the create-dir option:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-cursor", "./docs"]
+      "args": ["-y", "mcp-docs-service", "./my-custom-docs", "--create-dir"]
     }
   }
 }
 ```
 
-The `mcp-docs-cursor` entry point is specifically designed for Cursor integration and handles argument parsing more robustly.
+## Usage with Claude in Cursor
 
-Alternatively, you can still use the flag-based format:
+Once configured, you can use the MCP Documentation Service with Claude in Cursor:
 
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
-    }
-  }
-}
+1. Open Cursor and start a conversation with Claude
+2. Use the `@docs-manager` prefix to access the documentation tools:
+
+```
+@docs-manager read_document path=README.md
 ```
 
-Or:
-
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "--docs-dir", "/path/to/your/docs"]
-    }
-  }
-}
+```
+@docs-manager list_documents
 ```
 
-## Using with MCP Inspector
-
-If you're using the MCP Inspector to test the service, you can use the special `mcp-docs-inspector` entry point which is designed to work better with the MCP Inspector:
-
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-inspector", "/path/to/your/docs"]
-    }
-  }
-}
+```
+@docs-manager edit_document path=README.md edits=[{"oldText":"# Documentation", "newText":"# Project Documentation"}]
 ```
 
-This entry point handles the argument format used by the MCP Inspector more reliably.
+## Available Tools
 
-## Using MCP Docs Service in Cursor
-
-Once you've configured the MCP Docs Service, you can use it in Cursor by asking Claude to perform documentation-related tasks.
-
-Here are some examples of what you can ask Claude to do:
-
-- "Create a new documentation page for our API authentication"
-- "Update the installation guide to include the new configuration options"
-- "Find all documentation related to user authentication"
-- "Generate a navigation structure for our documentation"
-- "Check the health of our documentation and identify any issues"
-
-Claude will use the MCP Docs Service to perform these tasks, making it easy to manage your documentation without leaving your IDE.
+See the [Basic Usage Examples](../examples/basic-usage.md) for a complete list of available tools and how to use them.
 
 ## Troubleshooting
 
