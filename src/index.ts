@@ -23,14 +23,15 @@ import { diffLines, createTwoFilesPatch } from "diff";
 import { glob } from "glob";
 
 // Setup logging to avoid interfering with MCP protocol
-// When running under Cursor, we need to redirect console.log to stderr
+// When running under Cursor or NPX, we need to redirect console.log to stderr
 const isCursorWrapper = process.env.MCP_CURSOR_WRAPPER === "true";
+const isNpxWrapper = process.env.MCP_NPX_WRAPPER === "true";
 const isInspector = process.env.MCP_INSPECTOR === "true";
 
 // Create a safe logging function that won't interfere with MCP protocol
 const safeLog = (...args: any[]) => {
-  // When running under Cursor, redirect all logs to stderr
-  if (isCursorWrapper) {
+  // When running under Cursor or NPX, redirect all logs to stderr
+  if (isCursorWrapper || isNpxWrapper) {
     console.error(...args);
   } else {
     console.log(...args);
@@ -582,7 +583,7 @@ async function checkDocumentationHealth(basePath: string): Promise<{
 const server = new Server(
   {
     name: "mcp-docs-service",
-    version: "0.3.7",
+    version: "0.3.8",
   },
   {
     capabilities: {

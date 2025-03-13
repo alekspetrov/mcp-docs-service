@@ -19,8 +19,10 @@ npm install -g mcp-docs-service
 Or use directly with npx:
 
 ```bash
-npx mcp-docs-service
+npx mcp-docs-service-npx /path/to/docs
 ```
+
+> **Note**: When using with npx, use the `mcp-docs-service-npx` command to ensure proper stdio handling.
 
 ## Usage
 
@@ -60,6 +62,25 @@ To use with Cursor, create a `.cursor/mcp.json` file with:
 ```
 
 > **Note**: For Cursor integration, use the `mcp-docs-service-cursor` command instead of `mcp-docs-service`. This special wrapper ensures proper stdio handling for Cursor's MCP protocol communication.
+
+### NPX Integration
+
+For Cursor integration with npx, use:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service-npx", "/path/to/your/docs"],
+      "env": {
+        "NODE_ENV": "production",
+        "DEBUG": "mcp:*"
+      }
+    }
+  }
+}
+```
 
 ## Available Tools
 

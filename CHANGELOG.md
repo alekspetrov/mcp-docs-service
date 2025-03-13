@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.8] - 2024-03-13
+
+### Added
+
+- Added dedicated `npx-wrapper.cjs` script for better npx integration
+- Extended environment variable detection to support npx execution context
+
+### Fixed
+
+- Fixed npx integration issues by properly handling stdio communication
+- Redirected console output to stderr when running under npx to maintain clean protocol communication
+- Updated package.json to include the new npx wrapper script in the published package
+
 ## [0.3.7] - 2024-03-13
 
 ### Added

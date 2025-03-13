@@ -1,18 +1,20 @@
 {
   "name": "mcp-docs-service",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "MCP Documentation Service - A Model Context Protocol implementation for documentation management",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
     "mcp-docs-service": "dist/index.js",
-    "mcp-docs-service-cursor": "cursor-wrapper.cjs"
+    "mcp-docs-service-cursor": "cursor-wrapper.cjs",
+    "mcp-docs-service-npx": "npx-wrapper.cjs"
   },
   "files": [
     "dist",
     "README.md",
     "LICENSE",
-    "cursor-wrapper.cjs"
+    "cursor-wrapper.cjs",
+    "npx-wrapper.cjs"
   ],
   "scripts": {
     "build": "tsc",
