@@ -33,6 +33,12 @@ for (let i = 0; i < args.length; i++) {
     healthCheck = true;
   } else if (args[i] === "--help" || args[i] === "-h") {
     showHelp = true;
+  } else if (!args[i].startsWith("--") && fs.existsSync(args[i])) {
+    // Handle positional argument as docs directory
+    // This allows both formats:
+    // - mcp-docs-service /path/to/docs
+    // - mcp-docs-service --docs-dir /path/to/docs
+    docsDir = path.resolve(args[i]);
   }
 }
 
@@ -43,6 +49,7 @@ MCP Docs Service - Documentation Management Service
 
 Usage:
   mcp-docs-service [options]
+  mcp-docs-service <docs-directory> [options]
 
 Options:
   --docs-dir <path>   Specify the docs directory (default: ./docs)

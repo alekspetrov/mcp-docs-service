@@ -43,13 +43,28 @@ touch .cursor/mcp.json
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-service", "--docs-dir", "/path/to/your/docs"]
+      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
     }
   }
 }
 ```
 
 Replace `/path/to/your/docs` with the path to your documentation directory. This can be a relative path (e.g., `./docs`) or an absolute path.
+
+Alternatively, you can use the flag-based format:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service", "--docs-dir", "/path/to/your/docs"]
+    }
+  }
+}
+```
+
+Both formats are supported as of version 0.2.8.
 
 ## Using MCP Docs Service in Cursor
 

@@ -2,6 +2,14 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.9] - 2024-05-15
+
+### Fixed
+
+- Enhanced CLI argument handling to support both positional and flag-based formats
+- Updated Cursor integration documentation to show both supported formats
+- Fixed issue with MCP Inspector integration
+
 ## [0.2.8] - 2024-05-15
 
 ### Fixed

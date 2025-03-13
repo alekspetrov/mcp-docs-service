@@ -91,7 +91,7 @@ if (directoryArgs.length === 0) {
 const server = new Server(
   {
     name: "secure-filesystem-server",
-    version: "0.2.8",
+    version: "0.2.9",
   },
   {
     capabilities: {
