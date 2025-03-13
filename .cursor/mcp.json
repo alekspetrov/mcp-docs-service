@@ -1,8 +1,12 @@
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/run-mcp-docs.sh",
-      "args": ["/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"]
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-docs-service",
+        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
+      ]
     }
   }
 }
