@@ -1,10 +1,9 @@
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "mcp-docs-service",
+        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/dist/index.js",
         "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
       ]
     }
