@@ -1,6 +1,6 @@
 ---
 title: Cursor Integration Guide
-description: Guide for integrating MCP Docs Service with Cursor
+description: How to integrate the MCP Documentation Service with Cursor
 author: Claude
 date: 2024-03-12T00:00:00.000Z
 tags:
@@ -13,89 +13,91 @@ order: 3
 
 # Cursor Integration Guide
 
-This guide explains how to integrate the MCP Docs Service with Cursor to enable AI-powered documentation management.
+This guide explains how to integrate the MCP Documentation Service with Cursor IDE to enable AI-assisted documentation management.
 
-## Prerequisites
+## Setup
 
-- [Cursor](https://cursor.sh/) installed on your machine
-- A project with documentation in markdown format
+1. Install the MCP Documentation Service globally (optional):
 
-## Setting Up MCP Docs Service in Cursor
+   ```bash
+   npm install -g mcp-docs-service
+   ```
 
-To integrate MCP Docs Service with Cursor, you need to configure it in your project's `.cursor/mcp.json` file.
+   You can skip this step if you prefer to use `npx` directly.
 
-1. Create a `.cursor` directory in your project root if it doesn't exist:
+2. Create a `.cursor` directory in your project root if it doesn't exist:
 
-```bash
-mkdir -p .cursor
-```
+   ```bash
+   mkdir -p .cursor
+   ```
 
-2. Create or edit the `mcp.json` file in the `.cursor` directory:
+3. Create or edit the `.cursor/mcp.json` file with the following configuration:
 
-```bash
-touch .cursor/mcp.json
-```
+   ```json
+   {
+     "mcpServers": {
+       "docs-manager": {
+         "command": "npx",
+         "args": ["-y", "mcp-docs-service"]
+       }
+     }
+   }
+   ```
 
-3. Add the following configuration to the `mcp.json` file:
+   This configuration will use the default `docs` directory in your project root.
 
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
-    }
-  }
-}
-```
+## Custom Docs Directory
 
-Replace `/path/to/your/docs` with the path to your documentation directory. This can be a relative path (e.g., `./docs`) or an absolute path.
-
-Alternatively, you can use the flag-based format:
+If you want to specify a custom docs directory:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-service", "--docs-dir", "/path/to/your/docs"]
+      "args": ["-y", "mcp-docs-service", "./my-custom-docs"]
     }
   }
 }
 ```
 
-Both formats are supported as of version 0.2.8.
+## Auto-Create Docs Directory
 
-## Using with MCP Inspector
-
-If you're using the MCP Inspector to test the service, you can use the special `mcp-docs-inspector` entry point which is designed to work better with the MCP Inspector:
+To automatically create the docs directory if it doesn't exist:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-inspector", "/path/to/your/docs"]
+      "args": ["-y", "mcp-docs-service", "--create-dir"]
     }
   }
 }
 ```
 
-This entry point handles the argument format used by the MCP Inspector more reliably.
+## Usage with Claude in Cursor
 
-## Using MCP Docs Service in Cursor
+Once configured, you can use the MCP Documentation Service with Claude in Cursor:
 
-Once you've configured the MCP Docs Service, you can use it in Cursor by asking Claude to perform documentation-related tasks.
+1. Open Cursor and start a conversation with Claude
+2. Use the `@docs-manager` prefix to access the documentation tools:
 
-Here are some examples of what you can ask Claude to do:
+```
+@docs-manager read_document path=README.md
+```
 
-- "Create a new documentation page for our API authentication"
-- "Update the installation guide to include the new configuration options"
-- "Find all documentation related to user authentication"
-- "Generate a navigation structure for our documentation"
-- "Check the health of our documentation and identify any issues"
+```
+@docs-manager list_documents
+```
 
-Claude will use the MCP Docs Service to perform these tasks, making it easy to manage your documentation without leaving your IDE.
+```
+@docs-manager edit_document path=README.md edits=[{"oldText":"# Documentation", "newText":"# Project Documentation"}]
+```
+
+## Available Tools
+
+See the [Basic Usage Examples](../examples/basic-usage.md) for a complete list of available tools and how to use them.
 
 ## Troubleshooting
 

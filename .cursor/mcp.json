@@ -2,12 +2,7 @@
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-docs-service",
-        "--docs-dir",
-        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
-      ]
+      "args": ["-y", "mcp-docs-service"]
     }
   }
 }

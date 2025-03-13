@@ -1,7 +1,31 @@
-.qodo
+# Dependencies
 node_modules/
-.DS_Store
-*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
 dist/
-src/**/*.js
-temp-publish/
+build/
+*.tsbuildinfo
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Test coverage
+coverage/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log

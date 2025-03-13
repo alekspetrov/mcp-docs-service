@@ -1,0 +1,168 @@
+{
+  "sections": [
+    {
+      "title": "MCP Documentation",
+      "path": null,
+      "items": [
+        {
+          "title": "MCP Documentation",
+          "path": "/README.md",
+          "order": 1
+        },
+        {
+          "title": "Features Overview",
+          "path": "/features.md",
+          "order": 2
+        },
+        {
+          "title": "Roadmap",
+          "path": "/roadmap.md",
+          "order": 3
+        },
+        {
+          "title": "Documentation Navigation",
+          "path": "/navigation.md",
+          "order": 4
+        },
+        {
+          "title": "MCP Documentation Index",
+          "path": "/index.md",
+          "order": 5
+        }
+      ],
+      "order": 1
+    },
+    {
+      "title": "API",
+      "path": "/api",
+      "items": [
+        {
+          "title": "API Overview",
+          "path": "/api/overview.md",
+          "order": 1
+        },
+        {
+          "title": "Tools Reference",
+          "path": "/api/tools-reference.md",
+          "order": 2
+        },
+        {
+          "title": "API Documentation",
+          "path": "/api/index.md",
+          "order": 3
+        }
+      ],
+      "order": 2
+    },
+    {
+      "title": "Tools",
+      "path": "/api/tools",
+      "items": [
+        {
+          "title": "Check Documentation Health",
+          "path": "/api/tools/check-documentation-health.md",
+          "order": 1
+        },
+        {
+          "title": "Tools Documentation",
+          "path": "/api/tools/index.md",
+          "order": 2
+        }
+      ],
+      "order": 3
+    },
+    {
+      "title": "Guides",
+      "path": "/guides",
+      "items": [
+        {
+          "title": "Getting Started",
+          "path": "/guides/getting-started.md",
+          "order": 1
+        },
+        {
+          "title": "MCP Integration",
+          "path": "/guides/mcp-integration.md",
+          "order": 2
+        },
+        {
+          "title": "Cursor Integration",
+          "path": "/guides/cursor-integration.md",
+          "order": 3
+        },
+        {
+          "title": "Troubleshooting",
+          "path": "/guides/troubleshooting.md",
+          "order": 4
+        },
+        {
+          "title": "Guides",
+          "path": "/guides/index.md",
+          "order": 5
+        }
+      ],
+      "order": 4
+    },
+    {
+      "title": "Tutorials",
+      "path": "/tutorials",
+      "items": [
+        {
+          "title": "Basic Usage",
+          "path": "/tutorials/basic-usage.md",
+          "order": 1
+        },
+        {
+          "title": "Tutorials",
+          "path": "/tutorials/index.md",
+          "order": 2
+        }
+      ],
+      "order": 5
+    },
+    {
+      "title": "Examples",
+      "path": "/examples",
+      "items": [
+        {
+          "title": "Navigation Generator",
+          "path": "/examples/navigation-generator.md",
+          "order": 1
+        },
+        {
+          "title": "Knowledge Base Generator",
+          "path": "/examples/knowledge-base-generator.md",
+          "order": 2
+        },
+        {
+          "title": "Documentation Health Check",
+          "path": "/examples/documentation-health-check.md",
+          "order": 3
+        },
+        {
+          "title": "Examples",
+          "path": "/examples/index.md",
+          "order": 4
+        }
+      ],
+      "order": 6
+    },
+    {
+      "title": "Reports",
+      "path": "/reports",
+      "items": [
+        {
+          "title": "Health Report",
+          "path": "/reports/health-report.md",
+          "order": 1
+        },
+        {
+          "title": "Reports",
+          "path": "/reports/index.md",
+          "order": 2
+        }
+      ],
+      "order": 7
+    }
+  ]
+}

@@ -19,7 +19,16 @@ if (!fs.existsSync(tempDir)) {
 }
 
 // Copy essential files
-const filesToCopy = ["package.json", "README.md", "CHANGELOG.md", "LICENSE"];
+const filesToCopy = [
+  "package.json",
+  "README.md",
+  "CHANGELOG.md",
+  "LICENSE",
+  "mcp-inspector-wrapper.js",
+  "cursor-wrapper.js",
+  "npx-wrapper.js",
+  "npx-standalone.cjs",
+];
 
 filesToCopy.forEach((file) => {
   const sourcePath = path.join(rootDir, file);
