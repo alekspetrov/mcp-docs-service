@@ -19,6 +19,8 @@ const __dirname = path.dirname(__filename);
 const args = process.argv.slice(2);
 let docsDir = path.join(process.cwd(), "docs");
 let createDir = false;
+let healthCheck = false;
+let showHelp = false;
 
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
@@ -27,7 +29,28 @@ for (let i = 0; i < args.length; i++) {
     i++; // Skip the next argument
   } else if (args[i] === "--create-dir") {
     createDir = true;
+  } else if (args[i] === "--health-check") {
+    healthCheck = true;
+  } else if (args[i] === "--help" || args[i] === "-h") {
+    showHelp = true;
   }
+}
+
+// Show help if requested
+if (showHelp) {
+  console.log(`
+MCP Docs Service - Documentation Management Service
+
+Usage:
+  mcp-docs-service [options]
+
+Options:
+  --docs-dir <path>   Specify the docs directory (default: ./docs)
+  --create-dir        Create the docs directory if it doesn't exist
+  --health-check      Run a health check on the documentation
+  --help, -h          Show this help message
+  `);
+  process.exit(0);
 }
 
 // Create docs directory if it doesn't exist and --create-dir is specified
@@ -52,6 +75,11 @@ if (!fs.existsSync(docsDir)) {
 
 // Add the docs directory to process.argv so it's available to the main service
 process.argv.push(docsDir);
+
+// Add health check flag to process.argv if specified
+if (healthCheck) {
+  process.argv.push("--health-check");
+}
 
 // Import the main service
 import "../index.js";

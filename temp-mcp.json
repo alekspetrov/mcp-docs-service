@@ -4,8 +4,7 @@
       "command": "npx",
       "args": [
         "-y",
-        "mcp-docs-service",
-        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
+        "mcp-docs-service"
       ]
     }
   }

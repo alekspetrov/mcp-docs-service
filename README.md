@@ -11,7 +11,7 @@ The MCP Documentation Service is a custom implementation of the Model Context Pr
 - **Structure Analysis**: Analyze documentation structure and relationships
 - **Navigation Generation**: Generate navigation structures for documentation
 - **Tag Management**: Organize documentation by tags and categories
-- **Analytics**: Analyze documentation health and get suggestions for improvement
+- **Health Check**: Analyze documentation health and get suggestions for improvement
 - **Custom Directory Support**: Specify a custom docs directory and create it if it doesn't exist
 
 ## Documentation
@@ -22,6 +22,7 @@ Comprehensive documentation is available in the `docs` directory:
 - [API Overview](docs/api/overview.md) - Overview of the API and available tools
 - [Tools Reference](docs/api/tools-reference.md) - Complete reference of all available tools
 - [Features Overview](docs/features.md) - Comprehensive overview of all features
+- [Health Check Guide](docs/guides/health-check.md) - Guide for checking documentation health
 - [Basic Usage Tutorial](docs/tutorials/basic-usage.md) - Tutorial for basic usage
 - [Examples](docs/examples/) - Code examples for common tasks
   - [Navigation Generator](docs/examples/navigation-generator.md) - Example of how to generate navigation for documentation
@@ -43,6 +44,9 @@ npx mcp-docs-service --docs-dir ./my-custom-docs
 
 # Create the directory if it doesn't exist
 npx mcp-docs-service --docs-dir ./my-custom-docs --create-dir
+
+# Run a health check on your documentation
+npx mcp-docs-service --health-check
 
 # Show help
 npx mcp-docs-service --help
@@ -73,7 +77,31 @@ The MCP Documentation Service supports the following command-line options:
 
 - `--docs-dir <path>`: Specify the docs directory (default: ./docs)
 - `--create-dir`: Create the docs directory if it doesn't exist
+- `--health-check`: Run a health check on the documentation
 - `--help`, `-h`: Show help message
+
+## Health Check
+
+The MCP Documentation Service includes a health check feature that analyzes your documentation and provides insights into its quality, completeness, and structure.
+
+To run a health check:
+
+```bash
+# Using the CLI
+npx mcp-docs-service --health-check
+
+# Or using the npm script
+npm run health-check
+```
+
+The health check analyzes:
+
+- Metadata completeness
+- Broken links
+- Document status distribution
+- Tag usage
+
+For more details, see the [Health Check Guide](docs/guides/health-check.md).
 
 ## Integration
 

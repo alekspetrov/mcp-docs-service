@@ -25,6 +25,15 @@ import * as ToolSchemas from "./schemas/tools.js";
 // Command line argument parsing
 const args = process.argv.slice(2);
 let allowedDirectories = [];
+let runHealthCheck = false;
+
+// Check for health check flag
+if (args.includes("--health-check")) {
+  runHealthCheck = true;
+  // Remove the health check flag from args
+  const healthCheckIndex = args.indexOf("--health-check");
+  args.splice(healthCheckIndex, 1);
+}
 
 if (args.length === 0) {
   // Use default docs directory if none is provided
@@ -79,7 +88,7 @@ if (args.length === 0) {
 const server = new Server(
   {
     name: "secure-filesystem-server",
-    version: "0.2.0",
+    version: "0.2.6",
   },
   {
     capabilities: {
@@ -619,6 +628,73 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     };
   }
 });
+
+// If health check flag is set, run the health check and exit
+if (runHealthCheck) {
+  console.log("Running documentation health check...");
+
+  try {
+    const healthCheckResult = await DocsHandlers.checkDocumentationHealth(
+      "", // Use the first allowed directory
+      {
+        checkLinks: true,
+        checkMetadata: true,
+        checkOrphans: true,
+        requiredMetadataFields: ["title", "description", "status"],
+      },
+      allowedDirectories
+    );
+
+    if (healthCheckResult.isError) {
+      console.error("Health check failed:", healthCheckResult.content[0].text);
+      process.exit(1);
+    }
+
+    const metadata = healthCheckResult.metadata || {};
+
+    console.log("\n=== DOCUMENTATION HEALTH CHECK RESULTS ===\n");
+
+    console.log(`Overall Health Score: ${metadata.score || 0}%`);
+    console.log(`Total Documents: ${metadata.totalDocuments || 0}`);
+    console.log(
+      `Metadata Completeness: ${metadata.metadataCompleteness || 0}%`
+    );
+    console.log(`Broken Links: ${metadata.brokenLinks || 0}`);
+
+    if (metadata.issues && metadata.issues.length > 0) {
+      console.log("\nIssues Found:");
+
+      // Group issues by type
+      const issuesByType: Record<string, any[]> = {};
+      metadata.issues.forEach((issue: any) => {
+        if (!issuesByType[issue.type]) {
+          issuesByType[issue.type] = [];
+        }
+        issuesByType[issue.type].push(issue);
+      });
+
+      // Display issues by type
+      for (const [type, issues] of Object.entries(issuesByType)) {
+        console.log(
+          `\n${type.replace("_", " ").toUpperCase()} (${issues.length}):`
+        );
+        issues.forEach((issue: any) => {
+          console.log(`- ${issue.path}: ${issue.message}`);
+        });
+      }
+    } else {
+      console.log("\nNo issues found. Documentation is in good health!");
+    }
+
+    console.log("\n=== END OF HEALTH CHECK ===\n");
+
+    // Exit with success
+    process.exit(0);
+  } catch (error) {
+    console.error("Error running health check:", error);
+    process.exit(1);
+  }
+}
 
 // Connect to transport and start the server
 const transport = new StdioServerTransport();

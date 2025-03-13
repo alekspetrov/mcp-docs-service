@@ -2,6 +2,15 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.6] - 2024-05-15
+
+### Added
+
+- Added `--health-check` CLI flag for running documentation health checks
+- Added comprehensive documentation for the health check feature
+- Added npm script for running health checks
+- Updated README with health check information
+
 ## [0.2.5] - 2024-05-15
 
 ### Fixed

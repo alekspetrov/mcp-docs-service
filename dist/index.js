@@ -14,30 +14,58 @@ import * as DocsHandlers from "./handlers/docs.js";
 import * as ToolSchemas from "./schemas/tools.js";
 // Command line argument parsing
 const args = process.argv.slice(2);
-if (args.length === 0) {
-    console.error("Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]");
-    process.exit(1);
+let allowedDirectories = [];
+let runHealthCheck = false;
+// Check for health check flag
+if (args.includes("--health-check")) {
+    runHealthCheck = true;
+    // Remove the health check flag from args
+    const healthCheckIndex = args.indexOf("--health-check");
+    args.splice(healthCheckIndex, 1);
 }
-// Store allowed directories in normalized form
-const allowedDirectories = args.map((dir) => normalizePath(path.resolve(expandHome(dir))));
-// Validate that all directories exist and are accessible
-await Promise.all(args.map(async (dir) => {
+if (args.length === 0) {
+    // Use default docs directory if none is provided
+    const defaultDocsDir = path.join(process.cwd(), "docs");
     try {
-        const stats = await fs.stat(dir);
-        if (!stats.isDirectory()) {
-            console.error(`Error: ${dir} is not a directory`);
+        const stats = await fs.stat(defaultDocsDir);
+        if (stats.isDirectory()) {
+            console.log(`Using default docs directory: ${defaultDocsDir}`);
+            allowedDirectories = [normalizePath(path.resolve(defaultDocsDir))];
+        }
+        else {
+            console.error(`Error: Default docs directory ${defaultDocsDir} is not a directory`);
+            console.error("Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]");
             process.exit(1);
         }
     }
     catch (error) {
-        console.error(`Error accessing directory ${dir}:`, error);
+        console.error(`Error: Default docs directory ${defaultDocsDir} does not exist or is not accessible`);
+        console.error("Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]");
         process.exit(1);
     }
-}));
+}
+else {
+    // Store allowed directories in normalized form
+    allowedDirectories = args.map((dir) => normalizePath(path.resolve(expandHome(dir))));
+    // Validate that all directories exist and are accessible
+    await Promise.all(args.map(async (dir) => {
+        try {
+            const stats = await fs.stat(dir);
+            if (!stats.isDirectory()) {
+                console.error(`Error: ${dir} is not a directory`);
+                process.exit(1);
+            }
+        }
+        catch (error) {
+            console.error(`Error accessing directory ${dir}:`, error);
+            process.exit(1);
+        }
+    }));
+}
 // Create server
 const server = new Server({
     name: "secure-filesystem-server",
-    version: "0.2.0",
+    version: "0.2.6",
 }, {
     capabilities: {
         tools: {},
@@ -470,6 +498,57 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
     }
 });
+// If health check flag is set, run the health check and exit
+if (runHealthCheck) {
+    console.log("Running documentation health check...");
+    try {
+        const healthCheckResult = await DocsHandlers.checkDocumentationHealth("", // Use the first allowed directory
+        {
+            checkLinks: true,
+            checkMetadata: true,
+            checkOrphans: true,
+            requiredMetadataFields: ["title", "description", "status"],
+        }, allowedDirectories);
+        if (healthCheckResult.isError) {
+            console.error("Health check failed:", healthCheckResult.content[0].text);
+            process.exit(1);
+        }
+        const metadata = healthCheckResult.metadata || {};
+        console.log("\n=== DOCUMENTATION HEALTH CHECK RESULTS ===\n");
+        console.log(`Overall Health Score: ${metadata.score || 0}%`);
+        console.log(`Total Documents: ${metadata.totalDocuments || 0}`);
+        console.log(`Metadata Completeness: ${metadata.metadataCompleteness || 0}%`);
+        console.log(`Broken Links: ${metadata.brokenLinks || 0}`);
+        if (metadata.issues && metadata.issues.length > 0) {
+            console.log("\nIssues Found:");
+            // Group issues by type
+            const issuesByType = {};
+            metadata.issues.forEach((issue) => {
+                if (!issuesByType[issue.type]) {
+                    issuesByType[issue.type] = [];
+                }
+                issuesByType[issue.type].push(issue);
+            });
+            // Display issues by type
+            for (const [type, issues] of Object.entries(issuesByType)) {
+                console.log(`\n${type.replace("_", " ").toUpperCase()} (${issues.length}):`);
+                issues.forEach((issue) => {
+                    console.log(`- ${issue.path}: ${issue.message}`);
+                });
+            }
+        }
+        else {
+            console.log("\nNo issues found. Documentation is in good health!");
+        }
+        console.log("\n=== END OF HEALTH CHECK ===\n");
+        // Exit with success
+        process.exit(0);
+    }
+    catch (error) {
+        console.error("Error running health check:", error);
+        process.exit(1);
+    }
+}
 // Connect to transport and start the server
 const transport = new StdioServerTransport();
 await server.connect(transport);

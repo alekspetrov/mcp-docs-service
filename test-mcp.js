@@ -46,14 +46,17 @@ mcpProcess.stderr.on("data", (data) => {
 
 // Wait for the service to start
 setTimeout(() => {
-  // Send a request to read a document
+  // Send a request to check documentation health
   const request = {
     jsonrpc: "2.0",
     method: "tools/call",
     params: {
-      name: "read_document",
+      name: "check_documentation_health",
       arguments: {
-        path: "docs/roadmap.md",
+        basePath: "docs",
+        checkLinks: true,
+        checkMetadata: true,
+        checkOrphans: true,
       },
     },
     id: Date.now(),
