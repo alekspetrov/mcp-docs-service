@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2024-03-13
+
+### Changed
+
+- Updated documentation to use direct path argument pattern similar to filesystem server
+- Improved Cursor integration guide with clearer examples
+- Enhanced README with more explicit configuration examples
+
 ## [0.3.0] - 2024-03-13
 
 ### Changed
