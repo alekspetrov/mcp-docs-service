@@ -43,7 +43,7 @@ touch .cursor/mcp.json
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
+      "args": ["-y", "mcp-docs-service", "--docs-dir", "/path/to/your/docs"]
     }
   }
 }
