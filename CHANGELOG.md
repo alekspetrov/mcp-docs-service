@@ -2,6 +2,13 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.11] - 2024-05-15
+
+### Fixed
+
+- Fixed MCP Inspector wrapper script to use ES module syntax
+- Improved compatibility with MCP Inspector
+
 ## [0.2.10] - 2024-05-15
 
 ### Added

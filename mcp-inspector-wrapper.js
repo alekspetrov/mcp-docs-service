@@ -7,9 +7,14 @@
  * It extracts the docs directory from the arguments and passes it to the MCP Docs Service.
  */
 
-const path = require("path");
-const { spawn } = require("child_process");
-const fs = require("fs");
+import path from "path";
+import { spawn } from "child_process";
+import fs from "fs";
+import { fileURLToPath } from "url";
+
+// Get the current directory
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Get all arguments
 const args = process.argv.slice(2);
