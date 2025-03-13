@@ -33,6 +33,38 @@ To integrate the MCP Docs Service with Cursor, you need to configure it in your 
 
 ```json
 {
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service"]
+    }
+  }
+}
+```
+
+This configuration will use the default `docs` directory in your project root. If you want to specify a custom docs directory, use:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
+    }
+  }
+}
+```
+
+2. Make sure you have a `docs` directory in your project root, or specify a custom path as shown above.
+
+3. Cursor will automatically connect to the MCP Docs Service when you open your project.
+
+## Available Tools
+
+The MCP Docs Service provides the following tools that you can use in Cursor:
+
+```json
+{
   "docs-manager": {
     "command": "npx mcp-docs-service docs",
     "tools": [

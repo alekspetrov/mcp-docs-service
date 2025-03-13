@@ -92,20 +92,14 @@ Add this to your `.cursor/mcp.json` file:
 }
 ```
 
-To specify a custom docs directory:
+This configuration will use the default `docs` directory in your project root. If you want to specify a custom docs directory:
 
 ```json
 {
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": [
-        "-y",
-        "mcp-docs-service",
-        "--docs-dir",
-        "./my-custom-docs",
-        "--create-dir"
-      ]
+      "args": ["-y", "mcp-docs-service", "./my-custom-docs", "--create-dir"]
     }
   }
 }

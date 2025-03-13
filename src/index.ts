@@ -24,33 +24,56 @@ import * as ToolSchemas from "./schemas/tools.js";
 
 // Command line argument parsing
 const args = process.argv.slice(2);
+let allowedDirectories = [];
+
 if (args.length === 0) {
-  console.error(
-    "Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]"
-  );
-  process.exit(1);
-}
-
-// Store allowed directories in normalized form
-const allowedDirectories = args.map((dir) =>
-  normalizePath(path.resolve(expandHome(dir)))
-);
-
-// Validate that all directories exist and are accessible
-await Promise.all(
-  args.map(async (dir) => {
-    try {
-      const stats = await fs.stat(dir);
-      if (!stats.isDirectory()) {
-        console.error(`Error: ${dir} is not a directory`);
-        process.exit(1);
-      }
-    } catch (error) {
-      console.error(`Error accessing directory ${dir}:`, error);
+  // Use default docs directory if none is provided
+  const defaultDocsDir = path.join(process.cwd(), "docs");
+  try {
+    const stats = await fs.stat(defaultDocsDir);
+    if (stats.isDirectory()) {
+      console.log(`Using default docs directory: ${defaultDocsDir}`);
+      allowedDirectories = [normalizePath(path.resolve(defaultDocsDir))];
+    } else {
+      console.error(
+        `Error: Default docs directory ${defaultDocsDir} is not a directory`
+      );
+      console.error(
+        "Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]"
+      );
       process.exit(1);
     }
-  })
-);
+  } catch (error) {
+    console.error(
+      `Error: Default docs directory ${defaultDocsDir} does not exist or is not accessible`
+    );
+    console.error(
+      "Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]"
+    );
+    process.exit(1);
+  }
+} else {
+  // Store allowed directories in normalized form
+  allowedDirectories = args.map((dir) =>
+    normalizePath(path.resolve(expandHome(dir)))
+  );
+
+  // Validate that all directories exist and are accessible
+  await Promise.all(
+    args.map(async (dir) => {
+      try {
+        const stats = await fs.stat(dir);
+        if (!stats.isDirectory()) {
+          console.error(`Error: ${dir} is not a directory`);
+          process.exit(1);
+        }
+      } catch (error) {
+        console.error(`Error accessing directory ${dir}:`, error);
+        process.exit(1);
+      }
+    })
+  );
+}
 
 // Create server
 const server = new Server(
