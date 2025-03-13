@@ -38,17 +38,17 @@ This guide explains how to integrate the MCP Documentation Service with Cursor I
      "mcpServers": {
        "docs-manager": {
          "command": "npx",
-         "args": ["-y", "mcp-docs-service"]
+         "args": ["-y", "mcp-docs-service", "./docs"]
        }
      }
    }
    ```
 
-   This configuration will use the default `docs` directory in your project root.
+   This configuration specifies the `docs` directory in your project root. The docs directory path is provided directly as an argument, similar to how the filesystem MCP server works.
 
 ## Custom Docs Directory
 
-If you want to specify a custom docs directory:
+To specify a custom docs directory, simply change the path in the args array:
 
 ```json
 {
@@ -70,7 +70,20 @@ To automatically create the docs directory if it doesn't exist:
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": ["-y", "mcp-docs-service", "--create-dir"]
+      "args": ["-y", "mcp-docs-service", "./docs", "--create-dir"]
+    }
+  }
+}
+```
+
+You can also combine a custom path with the create-dir option:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service", "./my-custom-docs", "--create-dir"]
     }
   }
 }
