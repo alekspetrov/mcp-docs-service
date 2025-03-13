@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.2] - 2024-03-13
+
+### Fixed
+
+- Removed build directory and ensured output to dist directory
+- Fixed build process to correctly output to the directory referenced in package.json
+
 ## [0.3.1] - 2024-03-13
 
 ### Changed
