@@ -1,8 +1,12 @@
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "mcp-docs-service-cursor",
-      "args": ["/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"],
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-docs-service-npx",
+        "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
+      ],
       "env": {
         "NODE_ENV": "production",
         "DEBUG": "mcp:*"
