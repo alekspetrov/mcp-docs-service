@@ -22,6 +22,22 @@ import * as DocsHandlers from "./handlers/docs.js";
 // Import schemas
 import * as ToolSchemas from "./schemas/tools.js";
 
+// Check if we're running under MCP Inspector
+const isMCPInspector =
+  process.env.MCP_INSPECTOR === "true" ||
+  process.argv.some((arg) => arg.includes("modelcontextprotocol/inspector"));
+
+// Create a logging function that respects MCP Inspector mode
+const log = (...args: any[]) => {
+  if (!isMCPInspector) {
+    console.log(...args);
+  }
+};
+
+const errorLog = (...args: any[]) => {
+  console.error(...args);
+};
+
 // Command line argument parsing
 const args = process.argv.slice(2);
 let allowedDirectories = [];
@@ -44,22 +60,22 @@ if (directoryArgs.length === 0) {
   try {
     const stats = await fs.stat(defaultDocsDir);
     if (stats.isDirectory()) {
-      console.log(`Using default docs directory: ${defaultDocsDir}`);
+      log(`Using default docs directory: ${defaultDocsDir}`);
       allowedDirectories = [normalizePath(path.resolve(defaultDocsDir))];
     } else {
-      console.error(
+      errorLog(
         `Error: Default docs directory ${defaultDocsDir} is not a directory`
       );
-      console.error(
+      errorLog(
         "Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]"
       );
       process.exit(1);
     }
   } catch (error) {
-    console.error(
+    errorLog(
       `Error: Default docs directory ${defaultDocsDir} does not exist or is not accessible`
     );
-    console.error(
+    errorLog(
       "Usage: mcp-server-filesystem <allowed-directory> [additional-directories...]"
     );
     process.exit(1);
@@ -76,11 +92,11 @@ if (directoryArgs.length === 0) {
       try {
         const stats = await fs.stat(dir);
         if (!stats.isDirectory()) {
-          console.error(`Error: ${dir} is not a directory`);
+          errorLog(`Error: ${dir} is not a directory`);
           process.exit(1);
         }
       } catch (error) {
-        console.error(`Error accessing directory ${dir}:`, error);
+        errorLog(`Error accessing directory ${dir}:`, error);
         process.exit(1);
       }
     })
@@ -91,7 +107,7 @@ if (directoryArgs.length === 0) {
 const server = new Server(
   {
     name: "secure-filesystem-server",
-    version: "0.2.11",
+    version: "0.2.12",
   },
   {
     capabilities: {

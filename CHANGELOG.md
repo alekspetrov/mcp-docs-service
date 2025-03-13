@@ -2,6 +2,14 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.12] - 2024-05-15
+
+### Fixed
+
+- Fixed MCP Inspector integration by preventing non-JSON output to stdout
+- Improved logging to use stderr for diagnostic messages
+- Ensured wrapper script is included in the published package
+
 ## [0.2.11] - 2024-05-15
 
 ### Fixed

@@ -1,6 +1,6 @@
 {
   "name": "mcp-docs-service",
-  "version": "0.2.11",
+  "version": "0.2.12",
   "description": "MCP Documentation Management Service - A Model Context Protocol implementation for documentation management",
   "type": "module",
   "main": "dist/index.js",
@@ -49,7 +49,8 @@
     "dist",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "mcp-inspector-wrapper.js"
   ],
   "engines": {
     "node": ">=18"

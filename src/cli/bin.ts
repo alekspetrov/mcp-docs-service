@@ -15,9 +15,25 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Check if we're running under MCP Inspector
+const isMCPInspector =
+  process.env.MCP_INSPECTOR === "true" ||
+  process.argv.some((arg) => arg.includes("modelcontextprotocol/inspector"));
+
+// Create a logging function that respects MCP Inspector mode
+const log = (...args: any[]) => {
+  if (!isMCPInspector) {
+    console.log(...args);
+  }
+};
+
+const errorLog = (...args: any[]) => {
+  console.error(...args);
+};
+
 // Parse command line arguments
 const args = process.argv.slice(2);
-console.log("CLI Arguments:", JSON.stringify(args));
+log("CLI Arguments:", JSON.stringify(args));
 let docsDir = path.join(process.cwd(), "docs");
 let createDir = false;
 let healthCheck = false;
@@ -25,40 +41,32 @@ let showHelp = false;
 
 // MCP Inspector specific handling
 // When run through MCP Inspector, it might pass arguments in a different format
-// Let's try to detect if we're running under MCP Inspector
-const isMCPInspector =
-  process.env.MCP_INSPECTOR === "true" ||
-  process.argv.some((arg) => arg.includes("modelcontextprotocol/inspector"));
-
 if (isMCPInspector) {
-  console.log("Detected MCP Inspector environment");
+  log("Detected MCP Inspector environment");
 
   // Try to find a valid docs directory in all arguments
   // This is a more aggressive approach but should work with various argument formats
   for (const arg of process.argv) {
     if (arg.endsWith("/docs") || arg.includes("/docs ")) {
       const potentialPath = arg.split(" ")[0];
-      console.log(
-        "Found potential docs path in MCP Inspector args:",
-        potentialPath
-      );
+      log("Found potential docs path in MCP Inspector args:", potentialPath);
       if (fs.existsSync(potentialPath)) {
         docsDir = path.resolve(potentialPath);
-        console.log("Using docs directory from MCP Inspector:", docsDir);
+        log("Using docs directory from MCP Inspector:", docsDir);
         break;
       }
     }
   }
 
   // If we couldn't find a valid docs directory, use the default
-  console.log("Using docs directory:", docsDir);
+  log("Using docs directory:", docsDir);
 } else {
   // Standard argument parsing
   for (let i = 0; i < args.length; i++) {
-    console.log(`Processing arg[${i}]:`, args[i]);
+    log(`Processing arg[${i}]:`, args[i]);
     if (args[i] === "--docs-dir" && i + 1 < args.length) {
       docsDir = path.resolve(args[i + 1]);
-      console.log("Setting docs dir from --docs-dir flag:", docsDir);
+      log("Setting docs dir from --docs-dir flag:", docsDir);
       i++; // Skip the next argument
     } else if (args[i] === "--create-dir") {
       createDir = true;
@@ -69,23 +77,20 @@ if (isMCPInspector) {
     } else if (!args[i].startsWith("--")) {
       // Handle positional argument as docs directory
       const potentialPath = path.resolve(args[i]);
-      console.log("Potential positional path:", potentialPath);
-      console.log("Path exists?", fs.existsSync(potentialPath));
+      log("Potential positional path:", potentialPath);
+      log("Path exists?", fs.existsSync(potentialPath));
 
       if (fs.existsSync(potentialPath)) {
         docsDir = potentialPath;
-        console.log("Setting docs dir from positional argument:", docsDir);
+        log("Setting docs dir from positional argument:", docsDir);
       } else {
-        console.log(
-          "Path doesn't exist, not using as docs dir:",
-          potentialPath
-        );
+        log("Path doesn't exist, not using as docs dir:", potentialPath);
       }
     }
   }
 }
 
-console.log("Final docs dir:", docsDir);
+log("Final docs dir:", docsDir);
 
 // Show help if requested
 if (showHelp) {
@@ -110,18 +115,18 @@ if (createDir) {
   try {
     if (!fs.existsSync(docsDir)) {
       fs.mkdirSync(docsDir, { recursive: true });
-      console.log(`Created docs directory: ${docsDir}`);
+      log(`Created docs directory: ${docsDir}`);
     }
   } catch (error) {
-    console.error(`Error creating docs directory: ${error}`);
+    errorLog(`Error creating docs directory: ${error}`);
     process.exit(1);
   }
 }
 
 // Ensure the docs directory exists
 if (!fs.existsSync(docsDir)) {
-  console.error(`Error: Docs directory does not exist: ${docsDir}`);
-  console.error(`Use --create-dir to create it automatically`);
+  errorLog(`Error: Docs directory does not exist: ${docsDir}`);
+  errorLog(`Use --create-dir to create it automatically`);
   process.exit(1);
 }
 
