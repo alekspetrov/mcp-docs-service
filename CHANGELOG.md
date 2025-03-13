@@ -2,6 +2,14 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.8] - 2024-05-15
+
+### Fixed
+
+- Fixed MCP configuration to use correct CLI argument format
+- Updated documentation to use correct CLI argument format
+- Fixed issue with Cursor integration
+
 ## [0.2.7] - 2024-05-15
 
 ### Fixed
