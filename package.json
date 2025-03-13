@@ -1,12 +1,13 @@
 {
   "name": "mcp-docs-service",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "MCP Documentation Management Service - A Model Context Protocol implementation for documentation management",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "mcp-docs-service": "dist/cli/bin.js"
+    "mcp-docs-service": "dist/cli/bin.js",
+    "mcp-docs-inspector": "mcp-inspector-wrapper.js"
   },
   "scripts": {
     "build": "tsc",

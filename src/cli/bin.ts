@@ -17,30 +17,75 @@ const __dirname = path.dirname(__filename);
 
 // Parse command line arguments
 const args = process.argv.slice(2);
+console.log("CLI Arguments:", JSON.stringify(args));
 let docsDir = path.join(process.cwd(), "docs");
 let createDir = false;
 let healthCheck = false;
 let showHelp = false;
 
-// Parse arguments
-for (let i = 0; i < args.length; i++) {
-  if (args[i] === "--docs-dir" && i + 1 < args.length) {
-    docsDir = path.resolve(args[i + 1]);
-    i++; // Skip the next argument
-  } else if (args[i] === "--create-dir") {
-    createDir = true;
-  } else if (args[i] === "--health-check") {
-    healthCheck = true;
-  } else if (args[i] === "--help" || args[i] === "-h") {
-    showHelp = true;
-  } else if (!args[i].startsWith("--") && fs.existsSync(args[i])) {
-    // Handle positional argument as docs directory
-    // This allows both formats:
-    // - mcp-docs-service /path/to/docs
-    // - mcp-docs-service --docs-dir /path/to/docs
-    docsDir = path.resolve(args[i]);
+// MCP Inspector specific handling
+// When run through MCP Inspector, it might pass arguments in a different format
+// Let's try to detect if we're running under MCP Inspector
+const isMCPInspector =
+  process.env.MCP_INSPECTOR === "true" ||
+  process.argv.some((arg) => arg.includes("modelcontextprotocol/inspector"));
+
+if (isMCPInspector) {
+  console.log("Detected MCP Inspector environment");
+
+  // Try to find a valid docs directory in all arguments
+  // This is a more aggressive approach but should work with various argument formats
+  for (const arg of process.argv) {
+    if (arg.endsWith("/docs") || arg.includes("/docs ")) {
+      const potentialPath = arg.split(" ")[0];
+      console.log(
+        "Found potential docs path in MCP Inspector args:",
+        potentialPath
+      );
+      if (fs.existsSync(potentialPath)) {
+        docsDir = path.resolve(potentialPath);
+        console.log("Using docs directory from MCP Inspector:", docsDir);
+        break;
+      }
+    }
+  }
+
+  // If we couldn't find a valid docs directory, use the default
+  console.log("Using docs directory:", docsDir);
+} else {
+  // Standard argument parsing
+  for (let i = 0; i < args.length; i++) {
+    console.log(`Processing arg[${i}]:`, args[i]);
+    if (args[i] === "--docs-dir" && i + 1 < args.length) {
+      docsDir = path.resolve(args[i + 1]);
+      console.log("Setting docs dir from --docs-dir flag:", docsDir);
+      i++; // Skip the next argument
+    } else if (args[i] === "--create-dir") {
+      createDir = true;
+    } else if (args[i] === "--health-check") {
+      healthCheck = true;
+    } else if (args[i] === "--help" || args[i] === "-h") {
+      showHelp = true;
+    } else if (!args[i].startsWith("--")) {
+      // Handle positional argument as docs directory
+      const potentialPath = path.resolve(args[i]);
+      console.log("Potential positional path:", potentialPath);
+      console.log("Path exists?", fs.existsSync(potentialPath));
+
+      if (fs.existsSync(potentialPath)) {
+        docsDir = potentialPath;
+        console.log("Setting docs dir from positional argument:", docsDir);
+      } else {
+        console.log(
+          "Path doesn't exist, not using as docs dir:",
+          potentialPath
+        );
+      }
+    }
   }
 }
+
+console.log("Final docs dir:", docsDir);
 
 // Show help if requested
 if (showHelp) {

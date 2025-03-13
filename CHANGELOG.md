@@ -2,6 +2,17 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.10] - 2024-05-15
+
+### Added
+
+- Added `mcp-docs-inspector` entry point for better compatibility with MCP Inspector
+- Updated documentation with instructions for using MCP Inspector
+
+### Fixed
+
+- Fixed issue with MCP Inspector argument parsing
+
 ## [0.2.9] - 2024-05-15
 
 ### Fixed

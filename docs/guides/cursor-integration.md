@@ -66,6 +66,23 @@ Alternatively, you can use the flag-based format:
 
 Both formats are supported as of version 0.2.8.
 
+## Using with MCP Inspector
+
+If you're using the MCP Inspector to test the service, you can use the special `mcp-docs-inspector` entry point which is designed to work better with the MCP Inspector:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-inspector", "/path/to/your/docs"]
+    }
+  }
+}
+```
+
+This entry point handles the argument format used by the MCP Inspector more reliably.
+
 ## Using MCP Docs Service in Cursor
 
 Once you've configured the MCP Docs Service, you can use it in Cursor by asking Claude to perform documentation-related tasks.
