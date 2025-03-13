@@ -2,6 +2,14 @@
 
 All notable changes to the MCP Docs Service will be documented in this file.
 
+## [0.2.7] - 2024-05-15
+
+### Fixed
+
+- Fixed CLI argument handling to properly support flags
+- Updated MCP configuration to use node directly for local development
+- Improved documentation for Cursor integration
+
 ## [0.2.6] - 2024-05-15
 
 ### Added
