@@ -23,7 +23,9 @@ if (args.includes("--health-check")) {
     const healthCheckIndex = args.indexOf("--health-check");
     args.splice(healthCheckIndex, 1);
 }
-if (args.length === 0) {
+// Filter out any other flags (starting with --)
+const directoryArgs = args.filter((arg) => !arg.startsWith("--"));
+if (directoryArgs.length === 0) {
     // Use default docs directory if none is provided
     const defaultDocsDir = path.join(process.cwd(), "docs");
     try {
@@ -46,9 +48,9 @@ if (args.length === 0) {
 }
 else {
     // Store allowed directories in normalized form
-    allowedDirectories = args.map((dir) => normalizePath(path.resolve(expandHome(dir))));
+    allowedDirectories = directoryArgs.map((dir) => normalizePath(path.resolve(expandHome(dir))));
     // Validate that all directories exist and are accessible
-    await Promise.all(args.map(async (dir) => {
+    await Promise.all(directoryArgs.map(async (dir) => {
         try {
             const stats = await fs.stat(dir);
             if (!stats.isDirectory()) {

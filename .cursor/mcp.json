@@ -3,7 +3,7 @@
     "docs-manager": {
       "command": "npx",
       "args": [
-        "-y",
+        "--yes",
         "mcp-docs-service",
         "/Users/aleks.petrov/Projects/others/mcp/mcp-docs-service/docs"
       ]
