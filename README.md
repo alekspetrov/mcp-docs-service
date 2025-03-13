@@ -48,27 +48,18 @@ To use with Cursor, create a `.cursor/mcp.json` file with:
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "./docs"]
+      "command": "mcp-docs-service-cursor",
+      "args": ["/path/to/your/docs"],
+      "env": {
+        "NODE_ENV": "production",
+        "DEBUG": "mcp:*"
+      }
     }
   }
 }
 ```
 
-This configuration specifies the `docs` directory in your project root. The docs directory path is provided directly as an argument, similar to how the filesystem MCP server works.
-
-For a custom docs directory:
-
-```json
-{
-  "mcpServers": {
-    "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "./my-custom-docs"]
-    }
-  }
-}
-```
+> **Note**: For Cursor integration, use the `mcp-docs-service-cursor` command instead of `mcp-docs-service`. This special wrapper ensures proper stdio handling for Cursor's MCP protocol communication.
 
 ## Available Tools
 

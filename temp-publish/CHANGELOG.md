@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.6] - 2024-03-13
+
+### Fixed
+
+- Fixed critical version mismatch in server configuration
+- Added environment variables to Cursor configuration for better debugging
+- Ensured consistent version across package.json and server code
+
 ## [0.3.5] - 2024-03-13
 
 ### Fixed

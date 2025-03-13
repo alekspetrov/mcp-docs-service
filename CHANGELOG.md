@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.7] - 2024-03-13
+
+### Added
+
+- Added dedicated `cursor-wrapper.cjs` script for better Cursor integration
+- Implemented safe logging mechanism to prevent interference with MCP protocol
+- Added environment variable detection for different execution contexts
+
+### Fixed
+
+- Fixed Cursor integration issues by properly handling stdio communication
+- Redirected console output to stderr when running under Cursor to maintain clean protocol communication
+- Updated package.json to include the new wrapper script in the published package
+
+## [0.3.6] - 2024-03-13
+
+### Fixed
+
+- Fixed critical version mismatch in server configuration
+- Added environment variables to Cursor configuration for better debugging
+- Ensured consistent version across package.json and server code
+
 ## [0.3.5] - 2024-03-13
 
 ### Fixed

@@ -15,6 +15,20 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { createTwoFilesPatch } from "diff";
 import { glob } from "glob";
+// Setup logging to avoid interfering with MCP protocol
+// When running under Cursor, we need to redirect console.log to stderr
+const isCursorWrapper = process.env.MCP_CURSOR_WRAPPER === "true";
+const isInspector = process.env.MCP_INSPECTOR === "true";
+// Create a safe logging function that won't interfere with MCP protocol
+const safeLog = (...args) => {
+    // When running under Cursor, redirect all logs to stderr
+    if (isCursorWrapper) {
+        console.error(...args);
+    }
+    else {
+        console.log(...args);
+    }
+};
 // Command line argument parsing
 const args = process.argv.slice(2);
 let docsDir = path.join(process.cwd(), "docs");
@@ -42,7 +56,7 @@ docsDir = path.normalize(docsDir);
 try {
     const stats = await fs.stat(docsDir);
     if (!stats.isDirectory()) {
-        console.error(`Error: ${docsDir} is not a directory`);
+        safeLog(`Error: ${docsDir} is not a directory`);
         process.exit(1);
     }
 }
@@ -51,7 +65,7 @@ catch (error) {
     if (createDir) {
         try {
             await fs.mkdir(docsDir, { recursive: true });
-            console.log(`Created docs directory: ${docsDir}`);
+            safeLog(`Created docs directory: ${docsDir}`);
             // Create a sample README.md
             const readmePath = path.join(docsDir, "README.md");
             try {
@@ -68,22 +82,22 @@ description: Project documentation
 This is the documentation directory for your project.
 `;
                 await fs.writeFile(readmePath, content);
-                console.log(`Created sample README.md in ${docsDir}`);
+                safeLog(`Created sample README.md in ${docsDir}`);
             }
         }
         catch (error) {
-            console.error(`Error creating docs directory: ${error}`);
+            safeLog(`Error creating docs directory: ${error}`);
             process.exit(1);
         }
     }
     else {
-        console.error(`Error: Docs directory does not exist: ${docsDir}`);
-        console.error(`Use --create-dir to create it automatically`);
+        safeLog(`Error: Docs directory does not exist: ${docsDir}`);
+        safeLog(`Use --create-dir to create it automatically`);
         process.exit(1);
     }
 }
-console.log("MCP Documentation Service initialized with docs directory:", docsDir);
-console.log("Directory will be created if it doesn't exist");
+safeLog("MCP Documentation Service initialized with docs directory:", docsDir);
+safeLog("Directory will be created if it doesn't exist");
 // Schema definitions
 const ReadDocumentArgsSchema = z.object({
     path: z
@@ -438,7 +452,7 @@ async function checkDocumentationHealth(basePath) {
 // Server setup
 const server = new Server({
     name: "mcp-docs-service",
-    version: "0.3.5",
+    version: "0.3.7",
 }, {
     capabilities: {
         tools: {},
@@ -670,11 +684,11 @@ if (runHealthCheck) {
 async function runServer() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    console.log("MCP Documentation Management Service started.");
-    console.log("Using docs directory:", docsDir);
-    console.log("Reading from stdin, writing results to stdout...");
+    safeLog("MCP Documentation Management Service started.");
+    safeLog("Using docs directory:", docsDir);
+    safeLog("Reading from stdin, writing results to stdout...");
 }
 runServer().catch((error) => {
-    console.error("Fatal error running server:", error);
+    safeLog("Fatal error running server:", error);
     process.exit(1);
 });
