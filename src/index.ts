@@ -21,7 +21,6 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { diffLines, createTwoFilesPatch } from "diff";
 import { glob } from "glob";
-import { minimatch } from "minimatch";
 
 // Command line argument parsing
 const args = process.argv.slice(2);
