@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.10] - 2024-03-14
+
+### Fixed
+
+- Updated dependency `@modelcontextprotocol/sdk` to version 1.7.0 to fix installation issues
+- Fixed npx integration by ensuring compatibility with the latest MCP SDK
+
+## [0.3.9] - 2024-03-14
+
+### Improved
+
+- Enhanced npx wrapper with better error handling and debugging
+- Added fallback paths for finding the service script
+- Improved logging for troubleshooting npx integration issues
+- Added environment and system information to debug logs
+
 ## [0.3.8] - 2024-03-13
 
 ### Added
