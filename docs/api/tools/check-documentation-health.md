@@ -19,28 +19,25 @@ The `check_documentation_health` tool analyzes your documentation to identify is
 ## Usage
 
 ```typescript
-const healthResult = await mcp.callTool(
-  "docs-manager",
-  "check_documentation_health",
-  {
-    basePath: "docs",
-    checkLinks: true,
-    checkMetadata: true,
-    checkOrphans: true,
-    requiredMetadataFields: ["title", "description", "status"],
+// Using the MCP protocol directly
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "mcp_docs_manager_check_documentation_health",
+    arguments: {
+      basePath: "docs"
+    }
   }
-);
+};
 ```
 
 ## Parameters
 
-| Parameter                | Type     | Required | Default                              | Description                                                     |
-| ------------------------ | -------- | -------- | ------------------------------------ | --------------------------------------------------------------- |
-| `basePath`               | string   | No       | First allowed directory              | The base directory to check documentation in                    |
-| `checkLinks`             | boolean  | No       | `true`                               | Whether to check for broken internal links                      |
-| `checkMetadata`          | boolean  | No       | `true`                               | Whether to check for missing metadata fields                    |
-| `checkOrphans`           | boolean  | No       | `true`                               | Whether to check for orphaned documents (not in navigation)     |
-| `requiredMetadataFields` | string[] | No       | `["title", "description", "status"]` | List of metadata fields that should be present in all documents |
+| Parameter    | Type   | Required | Default                 | Description                                  |
+| ------------ | ------ | -------- | ----------------------- | -------------------------------------------- |
+| `basePath`   | string | No       | First allowed directory | The base directory to check documentation in |
 
 > **Note**: If the `basePath` parameter is not provided or is invalid, the tool will automatically use the first allowed directory. This ensures the tool can always run even if the path is not explicitly specified.
 
@@ -76,38 +73,50 @@ Each issue in the `issues` array has the following structure:
 
 ## Health Score Calculation
 
-The overall health score is calculated based on:
+The overall health score is calculated based on several factors:
 
-- Metadata completeness (70%)
-- No broken links (30%)
+- Metadata completeness (presence of required fields like title and description)
+- No broken links (links to other markdown files that don't exist)
+- Document organization (documents properly included in navigation)
 
-Orphaned documents are detected but do not affect the health score. The tool will identify documents not included in navigation but will not penalize the score for them.
+The exact weighting of these factors may vary, but the score provides a good overall indication of documentation health.
 
 A score of 100 indicates perfect documentation health, while lower scores indicate areas for improvement.
 
 ## Example
 
 ```typescript
-// Check documentation health
-const healthResult = await mcp.callTool(
-  "docs-manager",
-  "check_documentation_health",
-  {
-    basePath: "docs",
+// Using the MCP protocol directly
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "mcp_docs_manager_check_documentation_health",
+    arguments: {
+      basePath: "docs"
+    }
   }
-);
+};
 
-console.log(`Documentation Health Score: ${healthResult.metadata.score}%`);
-console.log(`Total Documents: ${healthResult.metadata.totalDocuments}`);
-console.log(`Issues Found: ${healthResult.metadata.issues.length}`);
+// When you receive the response
+socket.on('message', (data) => {
+  const response = JSON.parse(data);
+  if (response.id === 1 && response.result) {
+    const healthResult = response.result;
+    console.log(`Documentation Health Score: ${healthResult.metadata.score}%`);
+    console.log(`Total Documents: ${healthResult.metadata.totalDocuments}`);
+    console.log(`Issues Found: ${healthResult.metadata.issues.length}`);
 
-// Display issues by type
-const issuesByType = healthResult.metadata.issues.reduce((acc, issue) => {
-  acc[issue.type] = (acc[issue.type] || 0) + 1;
-  return acc;
-}, {});
+    // Display issues by type
+    const issuesByType = healthResult.metadata.issues.reduce((acc, issue) => {
+      acc[issue.type] = (acc[issue.type] || 0) + 1;
+      return acc;
+    }, {});
 
-console.log("Issues by type:", issuesByType);
+    console.log("Issues by type:", issuesByType);
+  }
+});
 ```
 
 ## Use Cases

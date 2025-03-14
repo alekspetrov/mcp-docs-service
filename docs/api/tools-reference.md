@@ -19,7 +19,9 @@ This document provides a complete reference of all tools available in the MCP Do
 
 These tools are specifically designed for working with documentation files (markdown with frontmatter).
 
-### read_document
+> **Note**: All tool names follow the format `mcp_docs_manager_*` (e.g., `mcp_docs_manager_read_document`). Make sure to use the full tool name when calling a tool.
+
+### mcp_docs_manager_read_document
 
 Reads a markdown document and extracts its content and metadata.
 
@@ -30,9 +32,18 @@ Reads a markdown document and extracts its content and metadata.
 **Example:**
 
 ```typescript
-const result = await mcp.callTool("docs-manager", "read_document", {
-  path: "docs/guides/getting-started.md",
-});
+// Using the MCP protocol directly
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "mcp_docs_manager_read_document",
+    arguments: {
+      path: "docs/guides/getting-started.md"
+    }
+  }
+};
 ```
 
 **Response:**
@@ -58,7 +69,7 @@ const result = await mcp.callTool("docs-manager", "read_document", {
 }
 ```
 
-### list_documents
+### mcp_docs_manager_list_documents
 
 Lists all markdown documents in a directory.
 
@@ -69,9 +80,19 @@ Lists all markdown documents in a directory.
 **Example:**
 
 ```typescript
-const result = await mcp.callTool("docs-manager", "list_documents", {
-  basePath: "docs",
-});
+// Using the MCP protocol directly
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "mcp_docs_manager_list_documents",
+    arguments: {
+      basePath: "docs",
+      recursive: true
+    }
+  }
+};
 ```
 
 **Response:**

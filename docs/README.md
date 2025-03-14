@@ -27,6 +27,7 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 - [Guides](guides/getting-started.md): Detailed guides for specific topics
   - [Getting Started](guides/getting-started.md): Introduction to the MCP Docs Manager
   - [MCP Integration](guides/mcp-integration.md): Guide for integrating with the Model Context Protocol
+  - [MCP Protocol Usage](guides/mcp-protocol-usage.md): Guide for using the correct MCP protocol methods
   - [Cursor Integration](guides/cursor-integration.md): Guide for integrating the MCP Docs Service with Cursor
 - [Roadmap](roadmap.md): Development roadmap and planned features
 
@@ -35,18 +36,14 @@ Welcome to the MCP Docs Manager documentation. This documentation will help you 
 The MCP Docs Manager provides tools for:
 
 - Reading and writing documentation files with metadata (frontmatter)
-- Editing and deleting documentation
-- Searching for documentation based on content or metadata
-- Organizing documentation in a structured way
-- Generating navigation for documentation
-- Creating comprehensive knowledge bases for LLM context
-- Analyzing documentation structure and relationships
-- Managing documentation categories and tags
+- Editing documentation with line-based changes
+- Listing and searching for documentation based on content or metadata
+- Generating navigation structures for documentation
 - Checking documentation health and quality
 - Identifying issues like missing metadata and broken links
 - Calculating documentation health scores
 - Integrating with the Model Context Protocol (MCP)
-- Easy integration with Cursor via npx
+- Easy integration with Cursor/Windsurf/Claude Desktop via npx
 
 ## Contributing
 
