@@ -19,6 +19,8 @@ MCP Documentation Service is a Model Context Protocol (MCP) implementation for d
 
 ### Installation
 
+Requires Node to be installed on your machine.
+
 ```bash
 npm install -g mcp-docs-service
 ```
@@ -75,7 +77,7 @@ Make sure to replace `/path/to/your/docs` with the absolute path to your documen
 
 4. **Restart Claude Desktop** completely.
 
-5. **Verify the tool is available** - After restarting, you should see a hammer icon in the bottom right corner of the input box. Click it to see the available tools, including the docs-manager tools.
+5. **Verify the tool is available** - After restarting, you should see a green dot for docs-manager MCP tool (Cursor Settings > MCP)
 
 6. **Troubleshooting**:
    - If the server doesn't appear, check the logs at:
@@ -125,7 +127,6 @@ Could you check if there are any issues with my documentation?
 When using Claude Desktop, you can invoke the tools in two ways:
 
 1. **Using Natural Language** (Recommended):
-   - Simply describe what you want in plain English:
 
 ```
 Can you read the README.md file for me?
@@ -147,9 +148,9 @@ I'd like you to check the health of our documentation and tell me if there are a
 
 Claude will interpret your natural language requests and use the appropriate tool with the correct parameters. You don't need to remember the exact tool names or parameter formats - just describe what you want to do!
 
-### Tool Reference (For Advanced Users)
+### Common Tool Commands
 
-Below are the direct tool commands for reference. **Remember that using natural language is recommended for most users.**
+Here are some common commands you can use with the tools:
 
 #### Reading a Document
 
@@ -188,8 +189,6 @@ This is a new document created with MCP Docs Service."
 @docs-manager mcp_docs_manager_generate_navigation
 ```
 
-These direct commands are primarily useful for developers or advanced users who need precise control over tool parameters.
-
 ## Contributing
 
 Contributions are welcome! Here's how you can contribute:
@@ -221,11 +220,11 @@ mcp-docs-service --health-check
 
 For more detailed information, check out our documentation:
 
-- [Getting Started Guide](docs/guides/getting-started.md)
-- [MCP Integration Guide](docs/guides/mcp-integration.md)
-- [MCP Protocol Usage](docs/guides/mcp-protocol-usage.md)
-- [API Reference](docs/api/tools-reference.md)
-- [Examples](docs/examples/basic-usage.md)
+- [Getting Started Guide](https://github.com/alekspetrov/mcp-docs-service/blob/main/docs/guides/getting-started.md)
+- [MCP Integration Guide](https://github.com/alekspetrov/mcp-docs-service/blob/main/docs/guides/mcp-integration.md)
+- [MCP Protocol Usage](https://github.com/alekspetrov/mcp-docs-service/blob/main/docs/guides/mcp-protocol-usage.md)
+- [API Reference](https://github.com/alekspetrov/mcp-docs-service/blob/main/docs/api/tools-reference.md)
+- [Examples](https://github.com/alekspetrov/mcp-docs-service/blob/main/docs/examples/basic-usage.md)
 
 ## License
 
