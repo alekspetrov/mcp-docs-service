@@ -2,29 +2,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.4.0] - 2024-03-14
-
-### Added
-
-- New modular architecture with separate handler classes for different functionality
-- Comprehensive test script for testing all available tools
-- New MCP Protocol Usage guide in documentation
-- Improved logging utilities
-
-### Fixed
-
-- Corrected MCP protocol method names to use `tools/list` and `tools/call`
-- Fixed parameter structure for tool calls
-- Updated documentation to match the current implementation
-- Resolved issues with health check handler
-
-### Improved
-
-- Better error handling and validation
-- More consistent code structure
-- Updated documentation with accurate examples
-- Cleaner codebase organization
-
 ## [0.3.10] - 2024-03-14
 
 ### Fixed
