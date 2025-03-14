@@ -88,7 +88,25 @@ Make sure to replace `/path/to/your/docs` with the absolute path to your documen
 
 ### Using with Claude in Cursor
 
-When using Claude in Cursor, you can invoke the tools directly in your conversation:
+When using Claude in Cursor, you can invoke the tools in two ways:
+
+1. **Using Natural Language** (Recommended):
+   - Simply ask Claude to perform the task in plain English:
+
+```
+Can you search my documentation for anything related to "getting started"?
+```
+
+```
+Please list all the markdown files in my docs directory.
+```
+
+```
+Could you check if there are any issues with my documentation?
+```
+
+2. **Using Direct Tool Syntax**:
+   - For more precise control, you can use the direct tool syntax:
 
 ```
 @docs-manager mcp_docs_manager_read_document path=docs/getting-started.md
@@ -106,33 +124,32 @@ When using Claude in Cursor, you can invoke the tools directly in your conversat
 
 When using Claude Desktop, you can invoke the tools in two ways:
 
-1. **Using the Tool Picker**:
+1. **Using Natural Language** (Recommended):
+   - Simply describe what you want in plain English:
 
+```
+Can you read the README.md file for me?
+```
+
+```
+Please find all documents that mention "API" in my documentation.
+```
+
+```
+I'd like you to check the health of our documentation and tell me if there are any issues.
+```
+
+2. **Using the Tool Picker**:
    - Click the hammer icon in the bottom right corner of the input box
    - Select "docs-manager" from the list of available tools
-   - Choose the specific tool you want to use (e.g., "mcp_docs_manager_read_document")
+   - Choose the specific tool you want to use
    - Fill in the required parameters and click "Run"
 
-2. **Using Natural Language**:
-   - You can ask Claude to use the tools in natural language:
+Claude will interpret your natural language requests and use the appropriate tool with the correct parameters. You don't need to remember the exact tool names or parameter formats - just describe what you want to do!
 
-```
-Can you use the docs-manager tool to read the README.md file?
-```
+### Tool Reference (For Advanced Users)
 
-```
-Please use the docs-manager tool to list all documents in the docs directory
-```
-
-```
-I'd like you to check the health of our documentation using the docs-manager tool
-```
-
-Claude will interpret these requests and use the appropriate tool with the correct parameters.
-
-### Common Tool Commands
-
-Here are some common commands you can use with the tools:
+Below are the direct tool commands for reference. **Remember that using natural language is recommended for most users.**
 
 #### Reading a Document
 
@@ -170,6 +187,8 @@ This is a new document created with MCP Docs Service."
 ```
 @docs-manager mcp_docs_manager_generate_navigation
 ```
+
+These direct commands are primarily useful for developers or advanced users who need precise control over tool parameters.
 
 ## Contributing
 
