@@ -46,13 +46,43 @@ To use with Cursor, create a `.cursor/mcp.json` file in your project root:
 
 ### Claude Desktop Integration
 
-For Claude Desktop, you can run the service in a terminal:
+To use MCP Docs Service with Claude Desktop:
 
-```bash
-mcp-docs-service --docs-dir /path/to/docs
+1. **Install Claude Desktop** - Download the latest version from [Claude's website](https://claude.ai/desktop).
+
+2. **Configure Claude Desktop for MCP**:
+
+   - Open Claude Desktop
+   - Click on the Claude menu and select "Developer Settings"
+   - This will create a configuration file at:
+     - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+     - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+3. **Edit the configuration file** to add the MCP Docs Service:
+
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "npx",
+      "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
+    }
+  }
+}
 ```
 
-Then configure Claude Desktop to use the service as an MCP tool.
+Make sure to replace `/path/to/your/docs` with the absolute path to your documentation directory.
+
+4. **Restart Claude Desktop** completely.
+
+5. **Verify the tool is available** - After restarting, you should see a hammer icon in the bottom right corner of the input box. Click it to see the available tools, including the docs-manager tools.
+
+6. **Troubleshooting**:
+   - If the server doesn't appear, check the logs at:
+     - macOS: `~/Library/Logs/Claude/mcp*.log`
+     - Windows: `%APPDATA%\Claude\logs\mcp*.log`
+   - Ensure Node.js is installed on your system
+   - Make sure the paths in your configuration are absolute and valid
 
 ## Examples
 
@@ -74,10 +104,20 @@ When using Claude in Cursor, you can invoke the tools directly in your conversat
 
 ### Using with Claude Desktop
 
-When using Claude Desktop, you can invoke the tools in your conversation:
+When using Claude Desktop, you can invoke the tools in two ways:
+
+1. **Using the Tool Picker**:
+
+   - Click the hammer icon in the bottom right corner of the input box
+   - Select "docs-manager" from the list of available tools
+   - Choose the specific tool you want to use (e.g., "mcp_docs_manager_read_document")
+   - Fill in the required parameters and click "Run"
+
+2. **Using Natural Language**:
+   - You can ask Claude to use the tools in natural language:
 
 ```
-Please use the docs-manager tool to read the file README.md
+Can you use the docs-manager tool to read the README.md file?
 ```
 
 ```
@@ -85,8 +125,10 @@ Please use the docs-manager tool to list all documents in the docs directory
 ```
 
 ```
-Please use the docs-manager tool to check the health of the documentation
+I'd like you to check the health of our documentation using the docs-manager tool
 ```
+
+Claude will interpret these requests and use the appropriate tool with the correct parameters.
 
 ### Common Tool Commands
 
