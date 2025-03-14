@@ -1,5 +1,9 @@
 # MCP Documentation Service
 
+<a href="https://glama.ai/mcp/servers/icfujodcjd">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/icfujodcjd/badge" />
+</a>
+
 ## What is it?
 
 MCP Documentation Service is a Model Context Protocol (MCP) implementation for documentation management. It provides a set of tools for reading, writing, and managing markdown documentation with frontmatter metadata. The service is designed to work seamlessly with AI assistants like Claude in Cursor or Claude Desktop, making it easy to manage your documentation through natural language interactions.
