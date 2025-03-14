@@ -17,7 +17,7 @@ This guide explains how to integrate the MCP Docs Manager with the Model Context
 
 ## Understanding the MCP Response Format
 
-When working with the MCP SDK, it's important to understand how responses are formatted. The MCP SDK automatically wraps tool responses in a `result` object, which can lead to double-wrapping if not handled correctly.
+When working with the MCP SDK, it's important to understand how responses are formatted. The MCP SDK follows the JSON-RPC 2.0 specification for request and response formatting.
 
 ### Response Structure
 
@@ -26,16 +26,14 @@ The MCP response has the following structure:
 ```json
 {
   "result": {
-    "result": {
-      "content": [
-        {
-          "type": "text",
-          "text": "Operation message"
-        }
-      ],
-      "metadata": {
-        // Tool-specific metadata
+    "content": [
+      {
+        "type": "text",
+        "text": "Operation message"
       }
+    ],
+    "metadata": {
+      // Tool-specific metadata
     }
   },
   "jsonrpc": "2.0",
@@ -45,13 +43,14 @@ The MCP response has the following structure:
 
 ### Handling Responses in Your Client
 
-When implementing an MCP client, you need to extract the actual result from the double-wrapped response:
+When implementing an MCP client, you can extract the result directly from the response:
 
 ```javascript
-// Extract the actual result from the double-wrapped response
-if (response.result && response.result.result) {
-  const actualResult = response.result.result;
-  console.log("Result:", JSON.stringify(actualResult, null, 2));
+// Extract the result from the response
+if (response.result) {
+  console.log("Result:", JSON.stringify(response.result, null, 2));
+} else if (response.error) {
+  console.error("Error:", JSON.stringify(response.error, null, 2));
 } else {
   console.log("Response:", JSON.stringify(response, null, 2));
 }
@@ -62,94 +61,163 @@ if (response.result && response.result.result) {
 When implementing an MCP server, ensure your tool handlers return responses in the correct format:
 
 ```typescript
-// Tool handler example
-{
-  name: "example_tool",
-  description: "Example tool description",
-  schema: ToolSchemas.ExampleToolSchema,
-  handler: async (args) => {
-    try {
-      // Tool implementation
-
-      return {
-        content: [
-          {
-            type: "text",
-            text: "Operation completed successfully"
-          }
-        ],
-        metadata: {
-          // Tool-specific metadata
-        }
-      };
-    } catch (error) {
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: ${error.message}`
-          }
-        ],
-        isError: true
-      };
+// Tool handler example in the CallToolRequestSchema handler
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
+  try {
+    const { name, arguments: args } = request.params;
+    
+    // Validate arguments using zod schema
+    const parsed = ToolSchema.safeParse(args);
+    if (!parsed.success) {
+      throw new Error(`Invalid arguments: ${parsed.error}`);
     }
+    
+    // Tool implementation
+    
+    return {
+      content: [
+        {
+          type: "text",
+          text: "Operation completed successfully"
+        }
+      ],
+      metadata: {
+        // Tool-specific metadata
+      }
+    };
+  } catch (error) {
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Error: ${error.message}`
+        }
+      ],
+      isError: true
+    };
   }
-}
+});
 ```
 
 ## Testing Your Integration
 
-You can test your MCP integration using a simple client script:
+You can test your MCP integration using a simple client script with WebSocket:
 
 ```javascript
-import { spawn } from "child_process";
-import path from "path";
+import WebSocket from 'ws';
+
+// Connect to the MCP service
+const socket = new WebSocket('ws://localhost:3000');
+
+socket.on('open', () => {
+  console.log('Connected to MCP service');
+  
+  // First, list available tools
+  const listToolsRequest = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "tools/list",
+    params: {}
+  };
+  
+  console.log('Sending tools/list request');
+  socket.send(JSON.stringify(listToolsRequest));
+});
+
+socket.on('message', (data) => {
+  const response = JSON.parse(data.toString());
+  console.log('Received response:', JSON.stringify(response, null, 2));
+  
+  // If we got a successful tools/list response, call a tool
+  if (response.id === 1 && response.result) {
+    const callToolRequest = {
+      jsonrpc: "2.0",
+      id: 2,
+      method: "tools/call",
+      params: {
+        name: "mcp_docs_manager_read_document",
+        arguments: {
+          path: "docs/roadmap.md"
+        }
+      }
+    };
+    
+    console.log('Sending tools/call request');
+    socket.send(JSON.stringify(callToolRequest));
+  }
+});
+
+socket.on('error', (error) => {
+  console.error('WebSocket error:', error);
+});
+
+socket.on('close', () => {
+  console.log('Connection closed');
+});
+```
+
+Alternatively, you can use stdio for communication:
+
+```javascript
+import { spawn } from 'child_process';
+import readline from 'readline';
 
 // Start the MCP service
-const mcpProcess = spawn("node", ["dist/index.js", "docs"]);
+const service = spawn('node', ['dist/index.js', '--docs-dir', 'docs']);
 
-// Set up pipes for communication
-mcpProcess.stdout.on("data", (data) => {
+// Create readline interface for reading service output
+const rl = readline.createInterface({
+  input: service.stdout,
+  terminal: false
+});
+
+// Handle service output
+rl.on('line', (line) => {
   try {
-    const response = JSON.parse(data.toString());
-
-    // Extract the actual result from the double-wrapped response
-    if (response.result && response.result.result) {
-      console.log("Result:", JSON.stringify(response.result.result, null, 2));
-    } else {
-      console.log("Response:", JSON.stringify(response, null, 2));
+    const response = JSON.parse(line);
+    console.log('Received response:', JSON.stringify(response, null, 2));
+    
+    // If we got a successful response, process it
+    if (response.result) {
+      console.log('Operation successful');
+    } else if (response.error) {
+      console.error('Error:', response.error);
     }
   } catch (error) {
-    console.log(`MCP stdout: ${data}`);
+    console.log('Service message:', line);
   }
 });
 
 // Send a request
 const request = {
   jsonrpc: "2.0",
+  id: 1,
   method: "tools/call",
   params: {
-    name: "read_document",
+    name: "mcp_docs_manager_read_document",
     arguments: {
-      path: "docs/roadmap.md",
-    },
-  },
-  id: Date.now(),
+      path: "docs/roadmap.md"
+    }
+  }
 };
 
-mcpProcess.stdin.write(JSON.stringify(request) + "\n");
+service.stdin.write(JSON.stringify(request) + '\n');
 ```
 
 ## Common Issues and Solutions
 
-1. **Double-wrapped responses**: The MCP SDK automatically wraps responses in a `result` object. Make sure your client extracts the actual result correctly.
+1. **Method names**: The MCP protocol uses specific method names: `tools/list` for listing available tools and `tools/call` for calling a specific tool. Make sure to use these exact method names.
 
-2. **Content format**: The `content` field in the response must always be an array of objects with `type` and `text` properties.
+2. **Tool names**: Tool names follow the format `mcp_docs_manager_*` (e.g., `mcp_docs_manager_read_document`). Make sure to use the correct tool names as returned by the `tools/list` method.
 
-3. **Error handling**: Use the `isError` flag to indicate errors, and include an error message in the `content` field.
+3. **Parameter structure**: When calling a tool, the `arguments` field must be inside the `params` object. For example: `params: { name: "tool_name", arguments: { /* tool arguments */ } }`.
 
-4. **Transport**: The MCP SDK uses a stdio transport by default, not a TCP server. Make sure your client communicates with the service correctly.
+4. **Content format**: The `content` field in the response is always an array of objects with `type` and `text` properties.
 
-5. **JSON parsing**: When passing JSON data as command-line arguments, make sure to parse it correctly in your client.
+5. **Error handling**: Check for the `isError` flag in the response to identify errors, and look for error messages in the `content` field.
+
+6. **Transport options**: The MCP SDK supports both stdio and WebSocket transports. Choose the appropriate transport for your use case.
+
+7. **JSON-RPC format**: All requests and responses follow the JSON-RPC 2.0 specification, including the `jsonrpc`, `id`, `method`, and `params`/`result`/`error` fields.
 
 By following these guidelines, you can ensure that your MCP integration works correctly and efficiently.

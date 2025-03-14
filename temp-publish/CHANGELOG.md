@@ -2,6 +2,49 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.10] - 2024-03-14
+
+### Fixed
+
+- Updated dependency `@modelcontextprotocol/sdk` to version 1.7.0 to fix installation issues
+- Fixed npx integration by ensuring compatibility with the latest MCP SDK
+
+## [0.3.9] - 2024-03-14
+
+### Improved
+
+- Enhanced npx wrapper with better error handling and debugging
+- Added fallback paths for finding the service script
+- Improved logging for troubleshooting npx integration issues
+- Added environment and system information to debug logs
+
+## [0.3.8] - 2024-03-13
+
+### Added
+
+- Added dedicated `npx-wrapper.cjs` script for better npx integration
+- Extended environment variable detection to support npx execution context
+
+### Fixed
+
+- Fixed npx integration issues by properly handling stdio communication
+- Redirected console output to stderr when running under npx to maintain clean protocol communication
+- Updated package.json to include the new npx wrapper script in the published package
+
+## [0.3.7] - 2024-03-13
+
+### Added
+
+- Added dedicated `cursor-wrapper.cjs` script for better Cursor integration
+- Implemented safe logging mechanism to prevent interference with MCP protocol
+- Added environment variable detection for different execution contexts
+
+### Fixed
+
+- Fixed Cursor integration issues by properly handling stdio communication
+- Redirected console output to stderr when running under Cursor to maintain clean protocol communication
+- Updated package.json to include the new wrapper script in the published package
+
 ## [0.3.6] - 2024-03-13
 
 ### Fixed
