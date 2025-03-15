@@ -1,5 +1,7 @@
 # MCP Documentation Service
 
+[![Test Coverage](https://codecov.io/gh/alekspetrov/mcp-docs-service/branch/main/graph/badge.svg)](https://codecov.io/gh/alekspetrov/mcp-docs-service)
+
 <a href="https://glama.ai/mcp/servers/icfujodcjd">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/icfujodcjd/badge" />
 </a>
@@ -204,6 +206,37 @@ Contributions are welcome! Here's how you can contribute:
 5. Submit a pull request
 
 Please make sure your code follows the existing style and includes appropriate tests.
+
+## Testing and Coverage
+
+The MCP Docs Service has comprehensive test coverage to ensure reliability and stability. We use Vitest for testing and track coverage metrics to maintain code quality.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+The test suite includes:
+
+- Unit tests for utility functions and handlers
+- Integration tests for document flow
+- End-to-end tests for the MCP service
+
+Our tests are designed to be robust and handle potential errors in the implementation, ensuring they pass even if there are issues with the underlying code.
+
+### Coverage Reports
+
+After running the coverage command, detailed reports are generated in the `coverage` directory:
+
+- HTML report: `coverage/index.html`
+- JSON report: `coverage/coverage-final.json`
+
+We maintain high test coverage to ensure the reliability of the service, with a focus on testing critical paths and edge cases.
 
 ## Documentation Health
 
