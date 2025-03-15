@@ -164,4 +164,12 @@ You can run the tests using the following command:
 npm test
 ```
 
-This will run all unit and integration tests to verify that the documentation validation features are working correctly.
+To generate test coverage reports, use:
+
+```bash
+npm run test:coverage
+```
+
+This will run all unit and integration tests and generate detailed coverage reports in the `coverage` directory. The coverage badge in the README.md shows the current test coverage status.
+
+We maintain high test coverage to ensure the reliability of the documentation validation features.
