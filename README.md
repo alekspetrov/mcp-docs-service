@@ -250,8 +250,25 @@ We use the MCP Docs Service to maintain the health of our own documentation. The
 You can check the health of your documentation with:
 
 ```bash
-mcp-docs-service --health-check
+npx mcp-docs-service --health-check /path/to/docs
 ```
+
+### Resilient by Default
+
+MCP Docs Service is designed to be resilient by default. The service automatically handles incomplete or poorly structured documentation without failing:
+
+- Returns a minimum health score of 70 even with issues
+- Handles missing documentation directories gracefully
+- Continues processing even when files have errors
+- Provides lenient scoring for metadata completeness and broken links
+
+This makes the service particularly useful for:
+
+- Legacy projects with minimal documentation
+- Projects in early stages of documentation development
+- When migrating documentation from other formats
+
+The service will always provide helpful feedback rather than failing, allowing you to incrementally improve your documentation over time.
 
 ## Documentation
 

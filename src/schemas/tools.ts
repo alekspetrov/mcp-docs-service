@@ -58,3 +58,43 @@ export const SearchDocumentsSchema = ToolInputSchema.extend({
 export const CheckDocumentationHealthSchema = ToolInputSchema.extend({
   basePath: z.string().optional().default(""),
 });
+
+// New schemas for Phase 2 features
+export const CreateFolderSchema = ToolInputSchema.extend({
+  path: z.string(),
+  createReadme: z.boolean().default(true),
+});
+
+export const MoveDocumentSchema = ToolInputSchema.extend({
+  sourcePath: z.string(),
+  destinationPath: z.string(),
+  updateReferences: z.boolean().default(true),
+});
+
+export const RenameDocumentSchema = ToolInputSchema.extend({
+  path: z.string(),
+  newName: z.string(),
+  updateReferences: z.boolean().default(true),
+});
+
+export const UpdateNavigationOrderSchema = ToolInputSchema.extend({
+  path: z.string(),
+  order: z.number(),
+});
+
+export const CreateSectionSchema = ToolInputSchema.extend({
+  title: z.string(),
+  path: z.string(),
+  order: z.number().optional(),
+});
+
+// New schemas for Phase 3 features
+export const ValidateLinksSchema = ToolInputSchema.extend({
+  basePath: z.string().optional().default(""),
+  recursive: z.boolean().default(true),
+});
+
+export const ValidateMetadataSchema = ToolInputSchema.extend({
+  basePath: z.string().optional().default(""),
+  requiredFields: z.array(z.string()).optional(),
+});
