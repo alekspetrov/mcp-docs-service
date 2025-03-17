@@ -1,6 +1,6 @@
 {
   "name": "mcp-docs-service",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "MCP Documentation Service - A Model Context Protocol implementation for documentation management",
   "type": "module",
   "main": "dist/index.js",
