@@ -24,7 +24,10 @@ status: published
 ## Guides
 - [Getting Started](guides/getting-started.md)
 - [MCP Integration](guides/mcp-integration.md)
+- [MCP Protocol Usage](guides/mcp-protocol-usage.md)
 - [Cursor Integration](guides/cursor-integration.md)
+- [Enhanced Structure Management](guides/enhanced-structure-management.md)
+- [Documentation Validation](guides/documentation-validation.md)
 - [Troubleshooting](guides/troubleshooting.md)
 
 ## Tutorials

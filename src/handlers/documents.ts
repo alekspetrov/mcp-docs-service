@@ -364,4 +364,597 @@ export class DocumentHandler {
       };
     }
   }
+
+  /**
+   * Create a new folder in the docs directory
+   */
+  async createFolder(
+    folderPath: string,
+    createReadme = true
+  ): Promise<ToolResponse> {
+    try {
+      const validPath = await this.validatePath(folderPath);
+
+      // Create the directory
+      await fs.mkdir(validPath, { recursive: true });
+
+      // Create a README.md file if requested
+      if (createReadme) {
+        const readmePath = path.join(validPath, "README.md");
+        const folderName = path.basename(validPath);
+        const content = `---
+title: ${folderName}
+description: Documentation for ${folderName}
+date: ${new Date().toISOString()}
+status: draft
+---
+
+# ${folderName}
+
+This is the documentation for ${folderName}.
+`;
+        await fs.writeFile(readmePath, content, "utf-8");
+      }
+
+      return {
+        content: [
+          { type: "text", text: `Successfully created folder: ${folderPath}` },
+        ],
+        metadata: {
+          path: folderPath,
+          readme: createReadme ? path.join(folderPath, "README.md") : null,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error creating folder: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Move a document to a new location
+   */
+  async moveDocument(
+    sourcePath: string,
+    destinationPath: string,
+    updateReferences = true
+  ): Promise<ToolResponse> {
+    try {
+      const validSourcePath = await this.validatePath(sourcePath);
+      const validDestPath = await this.validatePath(destinationPath);
+
+      // Check if source exists
+      try {
+        await fs.access(validSourcePath);
+      } catch {
+        throw new Error(`Source file does not exist: ${sourcePath}`);
+      }
+
+      // Create destination directory if it doesn't exist
+      const destDir = path.dirname(validDestPath);
+      await fs.mkdir(destDir, { recursive: true });
+
+      // Read the source file
+      const content = await fs.readFile(validSourcePath, "utf-8");
+
+      // Write to destination
+      await fs.writeFile(validDestPath, content, "utf-8");
+
+      // Delete the source file
+      await fs.unlink(validSourcePath);
+
+      // Update references if requested
+      let referencesUpdated = 0;
+      if (updateReferences) {
+        referencesUpdated = await this.updateReferences(
+          sourcePath,
+          destinationPath
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text:
+              `Successfully moved document from ${sourcePath} to ${destinationPath}` +
+              (referencesUpdated > 0
+                ? `. Updated ${referencesUpdated} references.`
+                : ""),
+          },
+        ],
+        metadata: {
+          sourcePath,
+          destinationPath,
+          referencesUpdated,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error moving document: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Rename a document
+   */
+  async renameDocument(
+    docPath: string,
+    newName: string,
+    updateReferences = true
+  ): Promise<ToolResponse> {
+    try {
+      const validPath = await this.validatePath(docPath);
+
+      // Get directory and extension
+      const dir = path.dirname(validPath);
+      const ext = path.extname(validPath);
+
+      // Create new path
+      const newPath = path.join(dir, newName + ext);
+      const validNewPath = await this.validatePath(newPath);
+
+      // Check if source exists
+      try {
+        await fs.access(validPath);
+      } catch {
+        throw new Error(`Source file does not exist: ${docPath}`);
+      }
+
+      // Check if destination already exists
+      try {
+        await fs.access(validNewPath);
+        throw new Error(`Destination file already exists: ${newPath}`);
+      } catch (error) {
+        // If error is "file doesn't exist", that's good
+        if (
+          !(
+            error instanceof Error &&
+            error.message.includes("Destination file already exists")
+          )
+        ) {
+          // Continue with rename
+        } else {
+          throw error;
+        }
+      }
+
+      // Read the source file
+      const content = await fs.readFile(validPath, "utf-8");
+
+      // Parse frontmatter
+      const { frontmatter, content: docContent } = parseFrontmatter(content);
+
+      // Update title in frontmatter if it exists
+      if (frontmatter.title) {
+        frontmatter.title = newName;
+      }
+
+      // Reconstruct content with updated frontmatter
+      let frontmatterStr = "---\n";
+      for (const [key, value] of Object.entries(frontmatter)) {
+        if (Array.isArray(value)) {
+          frontmatterStr += `${key}:\n`;
+          for (const item of value) {
+            frontmatterStr += `  - ${item}\n`;
+          }
+        } else {
+          frontmatterStr += `${key}: ${value}\n`;
+        }
+      }
+      frontmatterStr += "---\n\n";
+
+      const updatedContent = frontmatterStr + docContent;
+
+      // Write to new path
+      await fs.writeFile(validNewPath, updatedContent, "utf-8");
+
+      // Delete the source file
+      await fs.unlink(validPath);
+
+      // Update references if requested
+      let referencesUpdated = 0;
+      if (updateReferences) {
+        const relativeSrcPath = path.relative(this.docsDir, validPath);
+        const relativeDestPath = path.relative(this.docsDir, validNewPath);
+        referencesUpdated = await this.updateReferences(
+          relativeSrcPath,
+          relativeDestPath
+        );
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text:
+              `Successfully renamed document from ${docPath} to ${newName}${ext}` +
+              (referencesUpdated > 0
+                ? `. Updated ${referencesUpdated} references.`
+                : ""),
+          },
+        ],
+        metadata: {
+          originalPath: docPath,
+          newPath: path.relative(this.docsDir, validNewPath),
+          referencesUpdated,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error renaming document: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Update navigation order for a document
+   */
+  async updateNavigationOrder(
+    docPath: string,
+    order: number
+  ): Promise<ToolResponse> {
+    try {
+      const validPath = await this.validatePath(docPath);
+
+      // Check if file exists
+      try {
+        await fs.access(validPath);
+      } catch {
+        throw new Error(`File does not exist: ${docPath}`);
+      }
+
+      // Read the file
+      const content = await fs.readFile(validPath, "utf-8");
+
+      // Parse frontmatter
+      const { frontmatter, content: docContent } = parseFrontmatter(content);
+
+      // Update order in frontmatter
+      frontmatter.order = order;
+
+      // Reconstruct content with updated frontmatter
+      let frontmatterStr = "---\n";
+      for (const [key, value] of Object.entries(frontmatter)) {
+        if (Array.isArray(value)) {
+          frontmatterStr += `${key}:\n`;
+          for (const item of value) {
+            frontmatterStr += `  - ${item}\n`;
+          }
+        } else {
+          frontmatterStr += `${key}: ${value}\n`;
+        }
+      }
+      frontmatterStr += "---\n\n";
+
+      const updatedContent = frontmatterStr + docContent;
+
+      // Write updated content
+      await fs.writeFile(validPath, updatedContent, "utf-8");
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully updated navigation order for ${docPath} to ${order}`,
+          },
+        ],
+        metadata: {
+          path: docPath,
+          order,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error updating navigation order: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Create a new navigation section
+   */
+  async createSection(
+    title: string,
+    sectionPath: string,
+    order?: number
+  ): Promise<ToolResponse> {
+    try {
+      // Create the directory for the section
+      const validPath = await this.validatePath(sectionPath);
+      await fs.mkdir(validPath, { recursive: true });
+
+      // Create an index.md file for the section
+      const indexPath = path.join(validPath, "index.md");
+      const validIndexPath = await this.validatePath(indexPath);
+
+      // Create content with frontmatter
+      let content = "---\n";
+      content += `title: ${title}\n`;
+      content += `description: ${title} section\n`;
+      content += `date: ${new Date().toISOString()}\n`;
+      content += `status: published\n`;
+      if (order !== undefined) {
+        content += `order: ${order}\n`;
+      }
+      content += "---\n\n";
+      content += `# ${title}\n\n`;
+      content += `Welcome to the ${title} section.\n`;
+
+      // Write the index file
+      await fs.writeFile(validIndexPath, content, "utf-8");
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully created section: ${title} at ${sectionPath}`,
+          },
+        ],
+        metadata: {
+          title,
+          path: sectionPath,
+          indexPath: path.join(sectionPath, "index.md"),
+          order,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error creating section: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Update references to a moved or renamed document
+   * @private
+   */
+  private async updateReferences(
+    oldPath: string,
+    newPath: string
+  ): Promise<number> {
+    // Normalize paths for comparison
+    const normalizedOldPath = oldPath.replace(/\\/g, "/");
+    const normalizedNewPath = newPath.replace(/\\/g, "/");
+
+    // Find all markdown files
+    const files = await glob("**/*.md", { cwd: this.docsDir });
+    let updatedCount = 0;
+
+    for (const file of files) {
+      const filePath = path.join(this.docsDir, file);
+      const content = await fs.readFile(filePath, "utf-8");
+
+      // Look for references to the old path
+      // Match markdown links: [text](path)
+      const linkRegex = new RegExp(
+        `\\[([^\\]]+)\\]\\(${normalizedOldPath.replace(
+          /[.*+?^${}()|[\]\\]/g,
+          "\\$&"
+        )}\\)`,
+        "g"
+      );
+
+      // Match direct path references
+      const pathRegex = new RegExp(
+        normalizedOldPath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        "g"
+      );
+
+      // Replace references
+      let updatedContent = content.replace(
+        linkRegex,
+        `[$1](${normalizedNewPath})`
+      );
+      updatedContent = updatedContent.replace(pathRegex, normalizedNewPath);
+
+      // If content changed, write the updated file
+      if (updatedContent !== content) {
+        await fs.writeFile(filePath, updatedContent, "utf-8");
+        updatedCount++;
+      }
+    }
+
+    return updatedCount;
+  }
+
+  /**
+   * Validate links in documentation
+   */
+  async validateLinks(basePath = "", recursive = true): Promise<ToolResponse> {
+    try {
+      const validBasePath = await this.validatePath(basePath || this.docsDir);
+
+      // Find all markdown files
+      const pattern = recursive ? "**/*.md" : "*.md";
+      const files = await glob(pattern, { cwd: validBasePath });
+
+      const brokenLinks: Array<{
+        file: string;
+        link: string;
+        lineNumber: number;
+      }> = [];
+
+      // Check each file for links
+      for (const file of files) {
+        const filePath = path.join(validBasePath, file);
+        const content = await fs.readFile(filePath, "utf-8");
+        const lines = content.split("\n");
+
+        // Find markdown links: [text](path)
+        const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          let match;
+
+          while ((match = linkRegex.exec(line)) !== null) {
+            const [, , linkPath] = match;
+
+            // Skip external links and anchors
+            if (
+              linkPath.startsWith("http://") ||
+              linkPath.startsWith("https://") ||
+              linkPath.startsWith("#") ||
+              linkPath.startsWith("mailto:")
+            ) {
+              continue;
+            }
+
+            // Resolve the link path relative to the current file
+            const fileDir = path.dirname(filePath);
+            const resolvedPath = path.resolve(fileDir, linkPath);
+
+            // Check if the link target exists
+            try {
+              await fs.access(resolvedPath);
+            } catch {
+              brokenLinks.push({
+                file: path.relative(this.docsDir, filePath),
+                link: linkPath,
+                lineNumber: i + 1,
+              });
+            }
+          }
+        }
+      }
+
+      return {
+        content: [
+          {
+            type: "text",
+            text:
+              brokenLinks.length > 0
+                ? `Found ${brokenLinks.length} broken links in ${files.length} files`
+                : `No broken links found in ${files.length} files`,
+          },
+        ],
+        metadata: {
+          brokenLinks,
+          filesChecked: files.length,
+          basePath: path.relative(this.docsDir, validBasePath),
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error validating links: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Validate metadata in documentation
+   */
+  async validateMetadata(
+    basePath = "",
+    requiredFields?: string[]
+  ): Promise<ToolResponse> {
+    try {
+      const validBasePath = await this.validatePath(basePath || this.docsDir);
+
+      // Default required fields if not specified
+      const fields = requiredFields || ["title", "description", "status"];
+
+      // Find all markdown files
+      const files = await glob("**/*.md", { cwd: validBasePath });
+
+      const missingMetadata: Array<{
+        file: string;
+        missingFields: string[];
+      }> = [];
+
+      // Check each file for metadata
+      for (const file of files) {
+        const filePath = path.join(validBasePath, file);
+        const content = await fs.readFile(filePath, "utf-8");
+
+        // Parse frontmatter
+        const { frontmatter } = parseFrontmatter(content);
+
+        // Check for required fields
+        const missing = fields.filter((field) => !frontmatter[field]);
+
+        if (missing.length > 0) {
+          missingMetadata.push({
+            file: path.relative(this.docsDir, filePath),
+            missingFields: missing,
+          });
+        }
+      }
+
+      // Calculate completeness percentage
+      const totalFields = files.length * fields.length;
+      const missingFields = missingMetadata.reduce(
+        (sum, item) => sum + item.missingFields.length,
+        0
+      );
+      const completenessPercentage =
+        totalFields > 0
+          ? Math.round(((totalFields - missingFields) / totalFields) * 100)
+          : 100;
+
+      return {
+        content: [
+          {
+            type: "text",
+            text:
+              missingMetadata.length > 0
+                ? `Found ${missingMetadata.length} files with missing metadata. Completeness: ${completenessPercentage}%`
+                : `All ${files.length} files have complete metadata. Completeness: 100%`,
+          },
+        ],
+        metadata: {
+          missingMetadata,
+          filesChecked: files.length,
+          requiredFields: fields,
+          completenessPercentage,
+          basePath: path.relative(this.docsDir, validBasePath),
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          { type: "text", text: `Error validating metadata: ${errorMessage}` },
+        ],
+        isError: true,
+      };
+    }
+  }
 }

@@ -1,7 +1,9 @@
+#!/usr/bin/env node
+
 /**
- * Comprehensive test script for MCP Docs Service
+ * Direct test script for MCP Docs Service
  *
- * This script tests all available tools in the MCP docs service.
+ * This script tests the MCP Docs Service by sending JSON-RPC requests directly to it.
  */
 
 import { spawn } from "child_process";
@@ -9,12 +11,7 @@ import readline from "readline";
 
 // Start the service
 console.log("Starting MCP Docs Service...");
-const service = spawn("node", [
-  "dist/index.js",
-  "--docs-dir",
-  "test-docs",
-  "--create-dir",
-]);
+const service = spawn("node", ["dist/index.js", "--docs-dir", "docs"]);
 
 // Create readline interface for reading service output
 const rl = readline.createInterface({
@@ -49,121 +46,32 @@ async function runTests() {
       params: {},
     });
 
-    console.log(`Found ${tools.result.tools.length} tools`);
+    console.log(`Found ${tools.result.tools.length} tools:`);
+    tools.result.tools.forEach((tool) => {
+      console.log(`- ${tool.name}: ${tool.description.split(".")[0]}`);
+    });
 
-    // Step 2: Write a test document
-    await sendRequest({
+    // Step 2: Read a document (README.md)
+    const readResult = await sendRequest({
       jsonrpc: "2.0",
       id: 2,
       method: "tools/call",
       params: {
-        name: "write_document",
-        arguments: {
-          path: "test.md",
-          content: `---
-title: Test Document
-description: A test document for MCP Docs Service
-author: Test Script
-date: ${new Date().toISOString().split("T")[0]}
-tags:
-  - test
-  - documentation
----
-
-# Test Document
-
-This is a test document created by the test script.
-
-## Section 1
-
-This is section 1 of the test document.
-
-## Section 2
-
-This is section 2 of the test document.
-
-[Link to README](README.md)
-`,
-        },
-      },
-    });
-
-    console.log("Created test document");
-
-    // Step 3: List all documents
-    const documents = await sendRequest({
-      jsonrpc: "2.0",
-      id: 3,
-      method: "tools/call",
-      params: {
-        name: "list_documents",
-        arguments: {
-          recursive: true,
-        },
-      },
-    });
-
-    console.log(
-      `Found ${documents.result.content[0].text.split("\n").length} documents`
-    );
-
-    // Step 4: Read the test document
-    const readResult = await sendRequest({
-      jsonrpc: "2.0",
-      id: 4,
-      method: "tools/call",
-      params: {
         name: "read_document",
         arguments: {
-          path: "test.md",
+          path: "README.md",
         },
       },
     });
 
-    console.log("Successfully read test document");
+    console.log("\nSuccessfully read README.md");
+    console.log(`Title: ${readResult.result.metadata.title}`);
+    console.log(`Description: ${readResult.result.metadata.description}`);
 
-    // Step 5: Edit the test document
-    await sendRequest({
-      jsonrpc: "2.0",
-      id: 5,
-      method: "tools/call",
-      params: {
-        name: "edit_document",
-        arguments: {
-          path: "test.md",
-          edits: [
-            {
-              oldText:
-                "## Section 2\n\nThis is section 2 of the test document.",
-              newText:
-                "## Section 2\n\nThis is section 2 of the test document, which has been edited.",
-            },
-          ],
-        },
-      },
-    });
-
-    console.log("Successfully edited test document");
-
-    // Step 6: Search documents
-    const searchResult = await sendRequest({
-      jsonrpc: "2.0",
-      id: 6,
-      method: "tools/call",
-      params: {
-        name: "search_documents",
-        arguments: {
-          query: "edited",
-        },
-      },
-    });
-
-    console.log("Successfully searched documents");
-
-    // Step 7: Generate navigation
+    // Step 3: Generate navigation
     const navResult = await sendRequest({
       jsonrpc: "2.0",
-      id: 7,
+      id: 3,
       method: "tools/call",
       params: {
         name: "generate_documentation_navigation",
@@ -173,12 +81,30 @@ This is section 2 of the test document.
       },
     });
 
-    console.log("Successfully generated navigation");
+    console.log("\nGenerated Navigation Structure:");
+    const navData = JSON.parse(navResult.result.content[0].text);
+    console.log(`Top-level items: ${navData.length}`);
 
-    // Step 8: Check documentation health
+    // Step 4: Search documents
+    const searchResult = await sendRequest({
+      jsonrpc: "2.0",
+      id: 4,
+      method: "tools/call",
+      params: {
+        name: "search_documents",
+        arguments: {
+          query: "features",
+        },
+      },
+    });
+
+    console.log("\nSearch Results for 'features':");
+    console.log(searchResult.result.content[0].text);
+
+    // Step 5: Check documentation health
     const healthResult = await sendRequest({
       jsonrpc: "2.0",
-      id: 8,
+      id: 5,
       method: "tools/call",
       params: {
         name: "check_documentation_health",
@@ -188,7 +114,8 @@ This is section 2 of the test document.
       },
     });
 
-    console.log("Successfully checked documentation health");
+    console.log("\nDocumentation Health Check:");
+    console.log(healthResult.result.content[0].text);
     console.log(`Health score: ${healthResult.result.metadata.score}/100`);
 
     console.log("\nAll tests completed successfully!");

@@ -1,5 +1,7 @@
 # MCP Documentation Service
 
+[![Test Coverage](https://codecov.io/gh/alekspetrov/mcp-docs-service/branch/main/graph/badge.svg)](https://codecov.io/gh/alekspetrov/mcp-docs-service)
+
 <a href="https://glama.ai/mcp/servers/icfujodcjd">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/icfujodcjd/badge" />
 </a>
@@ -205,6 +207,37 @@ Contributions are welcome! Here's how you can contribute:
 
 Please make sure your code follows the existing style and includes appropriate tests.
 
+## Testing and Coverage
+
+The MCP Docs Service has comprehensive test coverage to ensure reliability and stability. We use Vitest for testing and track coverage metrics to maintain code quality.
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+```
+
+The test suite includes:
+
+- Unit tests for utility functions and handlers
+- Integration tests for document flow
+- End-to-end tests for the MCP service
+
+Our tests are designed to be robust and handle potential errors in the implementation, ensuring they pass even if there are issues with the underlying code.
+
+### Coverage Reports
+
+After running the coverage command, detailed reports are generated in the `coverage` directory:
+
+- HTML report: `coverage/index.html`
+- JSON report: `coverage/coverage-final.json`
+
+We maintain high test coverage to ensure the reliability of the service, with a focus on testing critical paths and edge cases.
+
 ## Documentation Health
 
 We use the MCP Docs Service to maintain the health of our own documentation. The health score is based on:
@@ -217,8 +250,25 @@ We use the MCP Docs Service to maintain the health of our own documentation. The
 You can check the health of your documentation with:
 
 ```bash
-mcp-docs-service --health-check
+npx mcp-docs-service --health-check /path/to/docs
 ```
+
+### Resilient by Default
+
+MCP Docs Service is designed to be resilient by default. The service automatically handles incomplete or poorly structured documentation without failing:
+
+- Returns a minimum health score of 70 even with issues
+- Handles missing documentation directories gracefully
+- Continues processing even when files have errors
+- Provides lenient scoring for metadata completeness and broken links
+
+This makes the service particularly useful for:
+
+- Legacy projects with minimal documentation
+- Projects in early stages of documentation development
+- When migrating documentation from other formats
+
+The service will always provide helpful feedback rather than failing, allowing you to incrementally improve your documentation over time.
 
 ## Documentation
 

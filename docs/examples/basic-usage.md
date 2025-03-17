@@ -1,6 +1,7 @@
 ---
 title: Basic Usage Example
 description: Examples of using the MCP Documentation Service
+status: published
 ---
 
 # Basic Usage Examples

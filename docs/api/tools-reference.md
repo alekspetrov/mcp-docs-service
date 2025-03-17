@@ -19,9 +19,9 @@ This document provides a complete reference of all tools available in the MCP Do
 
 These tools are specifically designed for working with documentation files (markdown with frontmatter).
 
-> **Note**: All tool names follow the format `mcp_docs_manager_*` (e.g., `mcp_docs_manager_read_document`). Make sure to use the full tool name when calling a tool.
+## Basic Document Operations
 
-### mcp_docs_manager_read_document
+### read_document
 
 Reads a markdown document and extracts its content and metadata.
 
@@ -38,11 +38,11 @@ const request = {
   id: 1,
   method: "tools/call",
   params: {
-    name: "mcp_docs_manager_read_document",
+    name: "read_document",
     arguments: {
-      path: "docs/guides/getting-started.md"
-    }
-  }
+      path: "docs/guides/getting-started.md",
+    },
+  },
 };
 ```
 
@@ -69,13 +69,14 @@ const request = {
 }
 ```
 
-### mcp_docs_manager_list_documents
+### list_documents
 
 Lists all markdown documents in a directory.
 
 **Parameters:**
 
 - `basePath` (optional): Base path to search from
+- `recursive` (optional): Whether to search recursively (default: false)
 
 **Example:**
 
@@ -86,12 +87,12 @@ const request = {
   id: 1,
   method: "tools/call",
   params: {
-    name: "mcp_docs_manager_list_documents",
+    name: "list_documents",
     arguments: {
       basePath: "docs",
-      recursive: true
-    }
-  }
+      recursive: true,
+    },
+  },
 };
 ```
 
@@ -114,134 +115,6 @@ const request = {
 }
 ```
 
-### get_structure
-
-Gets the structure of the documentation directory.
-
-**Parameters:**
-
-- `basePath` (optional): Base path to get structure from
-
-**Example:**
-
-```typescript
-const result = await mcp.callTool("docs-manager", "get_structure", {
-  basePath: "docs",
-});
-```
-
-**Response:**
-
-```typescript
-{
-  content: [
-    { type: "text", text: "Documentation structure retrieved successfully" }
-  ],
-  metadata: {
-    structure: {
-      name: string,
-      path: string,
-      type: "directory" | "file",
-      metadata?: object,
-      children: Array<TreeEntry>,
-      error?: string
-    }
-  }
-}
-```
-
-### get_navigation
-
-Gets the navigation structure for the documentation.
-
-**Parameters:**
-
-- `basePath` (optional): Base path to generate navigation from
-
-**Example:**
-
-```typescript
-const result = await mcp.callTool("docs-manager", "get_navigation", {
-  basePath: "docs",
-});
-```
-
-**Response:**
-
-```typescript
-{
-  content: [
-    { type: "text", text: "Navigation structure retrieved successfully" }
-  ],
-  metadata: {
-    navigation: Array<{
-      title: string,
-      path: string | null,
-      items: Array<{
-        title: string,
-        path: string,
-        order: number
-      }>,
-      order: number
-    }>
-  }
-}
-```
-
-### get_docs_knowledge_base
-
-Creates a comprehensive knowledge base of documentation for LLM context. This tool is particularly useful for providing the LLM with a complete overview of your documentation without requiring multiple file searches.
-
-**Parameters:**
-
-- `basePath` (optional): Base path to generate knowledge base from
-- `includeSummaries` (optional): Whether to include content summaries (default: true)
-- `maxSummaryLength` (optional): Maximum length of summaries (default: 500)
-
-**Example:**
-
-```typescript
-const result = await mcp.callTool("docs-manager", "get_docs_knowledge_base", {
-  basePath: "docs",
-  includeSummaries: true,
-  maxSummaryLength: 300,
-});
-```
-
-**Response:**
-
-```typescript
-{
-  content: [
-    { type: "text", text: "Generated knowledge base with X documents" }
-  ],
-  metadata: {
-    knowledgeBase: {
-      navigation: Array<NavigationSection>,
-      documents: Array<{
-        path: string,
-        name: string,
-        metadata: DocumentMetadata,
-        summary?: string
-      }>,
-      categories: {
-        [directoryPath: string]: Array<DocumentEntry>
-      },
-      tags: {
-        [tag: string]: Array<DocumentEntry>
-      }
-    }
-  }
-}
-```
-
-The knowledge base includes:
-
-- **navigation**: The navigation structure of the documentation
-- **documents**: All documents with their metadata and optional summaries
-- **categories**: Documents organized by directory
-- **tags**: Documents organized by tags
-
 ### write_document
 
 Writes content to a markdown document with frontmatter metadata.
@@ -250,23 +123,24 @@ Writes content to a markdown document with frontmatter metadata.
 
 - `path` (required): Path to the document to write
 - `content` (required): Document content (without frontmatter)
-- `metadata` (optional): Document metadata as an object
+- `createDirectories` (optional): Whether to create parent directories if they don't exist (default: true)
 
 **Example:**
 
 ```typescript
-const result = await mcp.callTool("docs-manager", "write_document", {
-  path: "docs/examples/example.md",
-  content: "# Example Document\n\nThis is an example document.",
-  metadata: {
-    title: "Example Document",
-    description: "An example document",
-    author: "MCP Docs Manager",
-    date: new Date().toISOString(),
-    tags: ["example", "documentation"],
-    status: "draft",
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "write_document",
+    arguments: {
+      path: "docs/examples/example.md",
+      content: "# Example Document\n\nThis is an example document.",
+      createDirectories: true,
+    },
   },
-});
+};
 ```
 
 **Response:**
@@ -292,19 +166,29 @@ Applies edits to a markdown document while preserving frontmatter.
 - `edits` (required): Array of edits to apply
   - `oldText` (required): Text to replace
   - `newText` (required): Text to replace with
+- `dryRun` (optional): Whether to perform a dry run without making changes (default: false)
 
 **Example:**
 
 ```typescript
-const result = await mcp.callTool("docs-manager", "edit_document", {
-  path: "docs/examples/example.md",
-  edits: [
-    {
-      oldText: "This is an example document.",
-      newText: "This is an updated example document.",
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "edit_document",
+    arguments: {
+      path: "docs/examples/example.md",
+      edits: [
+        {
+          oldText: "This is an example document.",
+          newText: "This is an updated example document.",
+        },
+      ],
+      dryRun: false,
     },
-  ],
-});
+  },
+};
 ```
 
 **Response:**
@@ -321,56 +205,30 @@ const result = await mcp.callTool("docs-manager", "edit_document", {
 }
 ```
 
-### delete_document
-
-Deletes a markdown document.
-
-**Parameters:**
-
-- `path` (required): Path to the document to delete
-
-**Example:**
-
-```typescript
-const result = await mcp.callTool("docs-manager", "delete_document", {
-  path: "docs/examples/example.md",
-});
-```
-
-**Response:**
-
-```typescript
-{
-  content: [
-    { type: "text", text: "Document deleted successfully" }
-  ],
-  metadata: {
-    path: string
-  }
-}
-```
-
 ### search_documents
 
 Searches for markdown documents matching criteria.
 
 **Parameters:**
 
-- `basePath` (optional): Base path to search from
-- `query` (optional): Search query to match against document content and metadata
-- `excludePatterns` (optional): Array of glob patterns to exclude
-- `tags` (optional): Array of tags to filter by
-- `status` (optional): Status to filter by
+- `query` (required): Search query to match against document content and metadata
+- `basePath` (optional): Base path to search from (default: "")
 
 **Example:**
 
 ```typescript
-const result = await mcp.callTool("docs-manager", "search_documents", {
-  basePath: "docs",
-  query: "getting started",
-  tags: ["guide"],
-  status: "published",
-});
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "search_documents",
+    arguments: {
+      query: "getting started",
+      basePath: "docs",
+    },
+  },
+};
 ```
 
 **Response:**
@@ -392,32 +250,76 @@ const result = await mcp.callTool("docs-manager", "search_documents", {
 }
 ```
 
+## Navigation and Structure
+
+### generate_documentation_navigation
+
+Generates a navigation structure from the markdown documents in the docs directory.
+
+**Parameters:**
+
+- `basePath` (optional): Base path to generate navigation from
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "generate_documentation_navigation",
+    arguments: {
+      basePath: "docs",
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Navigation structure generated successfully" }
+  ],
+  metadata: {
+    navigation: Array<{
+      title: string,
+      path: string | null,
+      items: Array<{
+        title: string,
+        path: string,
+        order: number
+      }>,
+      order: number
+    }>
+  }
+}
+```
+
 ### check_documentation_health
 
 Checks the health of documentation and identifies issues.
 
 **Parameters:**
 
-- `basePath` (optional): Base path to check documentation in
-- `checkLinks` (optional): Whether to check for broken internal links (default: true)
-- `checkMetadata` (optional): Whether to check for missing metadata fields (default: true)
-- `checkOrphans` (optional): Whether to check for orphaned documents (default: true)
-- `requiredMetadataFields` (optional): List of metadata fields that should be present (default: ["title", "description", "status"])
+- `basePath` (optional): Base path to check documentation in (default: "")
 
 **Example:**
 
 ```typescript
-const result = await mcp.callTool(
-  "docs-manager",
-  "check_documentation_health",
-  {
-    basePath: "docs",
-    checkLinks: true,
-    checkMetadata: true,
-    checkOrphans: true,
-    requiredMetadataFields: ["title", "description", "status"],
-  }
-);
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "check_documentation_health",
+    arguments: {
+      basePath: "docs",
+    },
+  },
+};
 ```
 
 **Response:**
@@ -447,21 +349,338 @@ const result = await mcp.callTool(
 }
 ```
 
-For more details, see the [Check Documentation Health](tools/check-documentation-health.md) reference.
+## Enhanced Structure Management
+
+### create_documentation_folder
+
+Creates a new folder in the docs directory.
+
+**Parameters:**
+
+- `path` (required): Path to the folder to create
+- `createReadme` (optional): Whether to create a README.md file in the folder (default: true)
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "create_documentation_folder",
+    arguments: {
+      path: "docs/new-section",
+      createReadme: true,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Successfully created folder: docs/new-section" }
+  ],
+  metadata: {
+    path: string,
+    readme: string | null
+  }
+}
+```
+
+### move_document
+
+Moves a document from one location to another.
+
+**Parameters:**
+
+- `sourcePath` (required): Path to the document to move
+- `destinationPath` (required): Path to move the document to
+- `updateReferences` (optional): Whether to update references to the document in other files (default: true)
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "move_document",
+    arguments: {
+      sourcePath: "docs/old-location/document.md",
+      destinationPath: "docs/new-location/document.md",
+      updateReferences: true,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Successfully moved document from docs/old-location/document.md to docs/new-location/document.md" }
+  ],
+  metadata: {
+    sourcePath: string,
+    destinationPath: string,
+    referencesUpdated: number
+  }
+}
+```
+
+### rename_document
+
+Renames a document while preserving its location and content.
+
+**Parameters:**
+
+- `path` (required): Path to the document to rename
+- `newName` (required): New name for the document (without extension)
+- `updateReferences` (optional): Whether to update references to the document in other files (default: true)
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "rename_document",
+    arguments: {
+      path: "docs/section/old-name.md",
+      newName: "new-name",
+      updateReferences: true,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Successfully renamed document from old-name.md to new-name.md" }
+  ],
+  metadata: {
+    originalPath: string,
+    newPath: string,
+    referencesUpdated: number
+  }
+}
+```
+
+### update_documentation_navigation_order
+
+Updates the navigation order of a document by modifying its frontmatter.
+
+**Parameters:**
+
+- `path` (required): Path to the document to update
+- `order` (required): New order value for the document
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "update_documentation_navigation_order",
+    arguments: {
+      path: "docs/section/document.md",
+      order: 3,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Successfully updated navigation order for docs/section/document.md to 3" }
+  ],
+  metadata: {
+    path: string,
+    order: number
+  }
+}
+```
+
+### create_documentation_section
+
+Creates a new navigation section with an index.md file.
+
+**Parameters:**
+
+- `title` (required): Title for the section
+- `path` (required): Path to create the section at
+- `order` (optional): Order value for the section
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "create_documentation_section",
+    arguments: {
+      title: "New Section",
+      path: "docs/new-section",
+      order: 5,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Successfully created section: New Section at docs/new-section" }
+  ],
+  metadata: {
+    title: string,
+    path: string,
+    indexPath: string,
+    order?: number
+  }
+}
+```
+
+## Documentation Validation
+
+### validate_documentation_links
+
+Checks for broken internal links in documentation files.
+
+**Parameters:**
+
+- `basePath` (optional): Base path to check links in (default: "")
+- `recursive` (optional): Whether to check links recursively (default: true)
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "validate_documentation_links",
+    arguments: {
+      basePath: "docs",
+      recursive: true,
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Found X broken links in Y files" }
+  ],
+  metadata: {
+    brokenLinks: Array<{
+      file: string,
+      link: string,
+      lineNumber: number
+    }>,
+    filesChecked: number,
+    basePath: string
+  }
+}
+```
+
+### validate_documentation_metadata
+
+Ensures all documents have required metadata fields.
+
+**Parameters:**
+
+- `basePath` (optional): Base path to check metadata in (default: "")
+- `requiredFields` (optional): Array of required metadata fields (default: ["title", "description", "status"])
+
+**Example:**
+
+```typescript
+const request = {
+  jsonrpc: "2.0",
+  id: 1,
+  method: "tools/call",
+  params: {
+    name: "validate_documentation_metadata",
+    arguments: {
+      basePath: "docs",
+      requiredFields: ["title", "description", "status", "date"],
+    },
+  },
+};
+```
+
+**Response:**
+
+```typescript
+{
+  content: [
+    { type: "text", text: "Found X files with missing metadata. Completeness: Y%" }
+  ],
+  metadata: {
+    missingMetadata: Array<{
+      file: string,
+      missingFields: string[]
+    }>,
+    filesChecked: number,
+    requiredFields: string[],
+    completenessPercentage: number,
+    basePath: string
+  }
+}
+```
 
 ## When to Use Each Tool
 
-### Documentation Tools
+### Basic Document Operations
 
 - **read_document**: Use when you need to read a specific markdown document and access both its content and metadata (frontmatter).
 - **list_documents**: Use when you need to get a list of all markdown documents in a directory, including their metadata.
-- **get_structure**: Use when you need to understand the hierarchical structure of your documentation, including directories and files.
-- **get_navigation**: Use when you need to generate a navigation structure for your documentation based on the file structure and metadata.
-- **get_docs_knowledge_base**: Use when you need to provide an LLM with comprehensive context about your documentation. This tool is ideal for creating a knowledge base that can be used to answer questions without requiring multiple file searches.
 - **write_document**: Use when you need to create or update a markdown document with frontmatter metadata.
 - **edit_document**: Use when you need to make specific edits to a markdown document while preserving its frontmatter.
-- **delete_document**: Use when you need to delete a markdown document.
 - **search_documents**: Use when you need to search for markdown documents based on content or metadata.
+
+### Navigation and Structure
+
+- **generate_documentation_navigation**: Use when you need to generate a navigation structure for your documentation based on the file structure and metadata.
+- **check_documentation_health**: Use when you need to check the health of your documentation, including missing metadata, broken links, and orphaned documents.
+
+### Enhanced Structure Management
+
+- **create_documentation_folder**: Use when you need to create a new folder for documentation with an optional README.md file.
+- **move_document**: Use when you need to move a document from one location to another while updating references.
+- **rename_document**: Use when you need to rename a document while preserving its location and updating references.
+- **update_documentation_navigation_order**: Use when you need to change the order of a document in navigation.
+- **create_documentation_section**: Use when you need to create a new navigation section with an index.md file.
+
+### Documentation Validation
+
+- **validate_documentation_links**: Use when you need to check for broken internal links in your documentation.
+- **validate_documentation_metadata**: Use when you need to ensure all documents have required metadata fields.
 
 ## Best Practices
 
@@ -469,6 +688,6 @@ For more details, see the [Check Documentation Health](tools/check-documentation
 
 2. **Path Handling**: Paths can be relative to the allowed directories or absolute. If using absolute paths, ensure they are within the allowed directories.
 
-3. **Performance Considerations**: For large documentation repositories, consider using more specific tools (like `read_document` for a specific file) rather than broader tools (like `get_structure` for the entire repository).
+3. **Performance Considerations**: For large documentation repositories, consider using more specific tools (like `read_document` for a specific file) rather than broader tools (like `generate_documentation_navigation` for the entire repository).
 
 4. **Metadata Usage**: Take advantage of the metadata extracted from markdown frontmatter to organize and structure your documentation.

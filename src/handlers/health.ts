@@ -39,9 +39,11 @@ export class HealthCheckHandler {
   ): Promise<ToolResponse> {
     try {
       // Always use tolerance mode by default
-      const toleranceMode = true;
+      const toleranceMode = options?.toleranceMode !== false;
       safeLog(
-        `Checking documentation health with tolerance mode enabled by default`
+        `Checking documentation health with tolerance mode ${
+          toleranceMode ? "enabled" : "disabled"
+        }`
       );
 
       // Get the full path to the docs directory
@@ -269,7 +271,7 @@ ${results.issues
         (30 * (100 - metadataCompleteness)) / 100
       );
       score -= toleranceMode
-        ? Math.min(metadataDeduction, 15)
+        ? Math.min(metadataDeduction, 10)
         : metadataDeduction;
     }
 
@@ -278,7 +280,7 @@ ${results.issues
       // Deduct 2 points per broken link, up to 20 points
       const brokenLinksDeduction = Math.min(results.brokenLinks * 2, 20);
       score -= toleranceMode
-        ? Math.min(brokenLinksDeduction, 10)
+        ? Math.min(brokenLinksDeduction, 5)
         : brokenLinksDeduction;
     }
 
@@ -300,9 +302,9 @@ ${results.issues
         : missingRefsDeduction;
     }
 
-    // In tolerance mode, ensure a minimum score of 70
-    if (toleranceMode && score < 70) {
-      score = 70;
+    // In tolerance mode, ensure a minimum score of 80
+    if (toleranceMode && score < 80) {
+      score = 80;
     }
 
     return Math.max(0, score);

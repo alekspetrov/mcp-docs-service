@@ -76,13 +76,13 @@ async function ensureDocsDirectory() {
       process.exit(1);
     }
   } catch (error) {
-    // Create directory if it doesn't exist and --create-dir is specified
-    if (createDir) {
-      try {
-        await fs.mkdir(docsDir, { recursive: true });
-        safeLog(`Created docs directory: ${docsDir}`);
+    // Create directory if it doesn't exist
+    try {
+      await fs.mkdir(docsDir, { recursive: true });
+      safeLog(`Created docs directory: ${docsDir}`);
 
-        // Create a sample README.md
+      // Create a sample README.md if --create-dir is specified
+      if (createDir) {
         const readmePath = path.join(docsDir, "README.md");
         try {
           await fs.access(readmePath);
@@ -99,13 +99,10 @@ This is the documentation directory for your project.
           await fs.writeFile(readmePath, content);
           safeLog(`Created sample README.md in ${docsDir}`);
         }
-      } catch (error) {
-        safeLog(`Error creating docs directory: ${error}`);
-        process.exit(1);
       }
-    } else {
-      safeLog(`Error: Docs directory does not exist: ${docsDir}`);
-      safeLog(`Use --create-dir to create it automatically`);
+      return;
+    } catch (error) {
+      safeLog(`Error creating docs directory: ${error}`);
       process.exit(1);
     }
   }
@@ -181,7 +178,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
         name: "check_documentation_health",
         description:
           "Check the health of the documentation by analyzing frontmatter, links, and navigation. " +
-          "Returns a report with issues and a health score.",
+          "Returns a report with issues and a health score. " +
+          "Uses tolerance mode by default to provide a more forgiving health score for incomplete documentation.",
         inputSchema: zodToJsonSchema(CheckDocumentationHealthSchema) as any,
       },
       // New tools for Phase 2
@@ -319,7 +317,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           );
         }
         return await healthCheckHandler.checkDocumentationHealth(
-          parsed.data.basePath
+          parsed.data.basePath,
+          { toleranceMode: parsed.data.toleranceMode }
         );
       }
 

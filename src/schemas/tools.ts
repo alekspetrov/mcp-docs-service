@@ -57,6 +57,7 @@ export const SearchDocumentsSchema = ToolInputSchema.extend({
 
 export const CheckDocumentationHealthSchema = ToolInputSchema.extend({
   basePath: z.string().optional().default(""),
+  toleranceMode: z.boolean().optional().default(true),
 });
 
 // New schemas for Phase 2 features
