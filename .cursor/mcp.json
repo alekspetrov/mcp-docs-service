@@ -2,14 +2,7 @@
   "mcpServers": {
     "docs-manager": {
       "command": "npx",
-      "args": [
-        "--package=mcp-docs-service@0.5.1",
-        "mcp-docs-service",
-        "./docs"
-      ],
-      "env": {
-        "DEBUG": "mcp*,mcp-docs-service*"
-      }
+      "args": ["-y", "mcp-docs-service", "./docs"]
     }
   }
 }

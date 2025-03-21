@@ -257,7 +257,8 @@ npx mcp-docs-service --health-check /path/to/docs
 
 MCP Docs Service is designed to be resilient by default. The service automatically handles incomplete or poorly structured documentation without failing:
 
-- Returns a minimum health score of 70 even with issues
+- Returns a minimum health score of 80 even with issues
+- Automatically creates missing documentation directories
 - Handles missing documentation directories gracefully
 - Continues processing even when files have errors
 - Provides lenient scoring for metadata completeness and broken links
@@ -269,6 +270,21 @@ This makes the service particularly useful for:
 - When migrating documentation from other formats
 
 The service will always provide helpful feedback rather than failing, allowing you to incrementally improve your documentation over time.
+
+## Version History
+
+### v0.5.2
+
+- Enhanced resilience by automatically creating missing documentation directories
+- Improved tolerance mode with a minimum health score of 80
+- Made tolerance mode the default for health checks
+- Updated health check tool description to mention tolerance mode
+
+### v0.5.1
+
+- Added tolerance mode to health checks
+- Fixed issues with test suite reliability
+- Improved error handling in document operations
 
 ## Documentation
 

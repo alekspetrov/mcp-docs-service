@@ -50,12 +50,12 @@ async function ensureDocsDirectory() {
         }
     }
     catch (error) {
-        // Create directory if it doesn't exist and --create-dir is specified
-        if (createDir) {
-            try {
-                await fs.mkdir(docsDir, { recursive: true });
-                safeLog(`Created docs directory: ${docsDir}`);
-                // Create a sample README.md
+        // Create directory if it doesn't exist
+        try {
+            await fs.mkdir(docsDir, { recursive: true });
+            safeLog(`Created docs directory: ${docsDir}`);
+            // Create a sample README.md if --create-dir is specified
+            if (createDir) {
                 const readmePath = path.join(docsDir, "README.md");
                 try {
                     await fs.access(readmePath);
@@ -74,14 +74,10 @@ This is the documentation directory for your project.
                     safeLog(`Created sample README.md in ${docsDir}`);
                 }
             }
-            catch (error) {
-                safeLog(`Error creating docs directory: ${error}`);
-                process.exit(1);
-            }
+            return;
         }
-        else {
-            safeLog(`Error: Docs directory does not exist: ${docsDir}`);
-            safeLog(`Use --create-dir to create it automatically`);
+        catch (error) {
+            safeLog(`Error creating docs directory: ${error}`);
             process.exit(1);
         }
     }
@@ -144,7 +140,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
             {
                 name: "check_documentation_health",
                 description: "Check the health of the documentation by analyzing frontmatter, links, and navigation. " +
-                    "Returns a report with issues and a health score.",
+                    "Returns a report with issues and a health score. " +
+                    "Uses tolerance mode by default to provide a more forgiving health score for incomplete documentation.",
                 inputSchema: zodToJsonSchema(CheckDocumentationHealthSchema),
             },
             // New tools for Phase 2
@@ -241,7 +238,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 if (!parsed.success) {
                     throw new Error(`Invalid arguments for check_documentation_health: ${parsed.error}`);
                 }
-                return await healthCheckHandler.checkDocumentationHealth(parsed.data.basePath);
+                return await healthCheckHandler.checkDocumentationHealth(parsed.data.basePath, { toleranceMode: parsed.data.toleranceMode });
             }
             // New tools for Phase 2
             case "create_documentation_folder": {

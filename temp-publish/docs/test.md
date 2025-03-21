@@ -1,6 +1,7 @@
 ---
 title: Test Document
 description: A test document created using the docs-manager tool
+status: published
 ---
 
 # Test Document
