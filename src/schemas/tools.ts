@@ -99,3 +99,13 @@ export const ValidateMetadataSchema = ToolInputSchema.extend({
   basePath: z.string().optional().default(""),
   requiredFields: z.array(z.string()).optional(),
 });
+
+// New schema for consolidated documentation generation
+export const ConsolidateDocumentationSchema = ToolInputSchema.extend({
+  basePath: z.string().optional().default(""),
+  outputPath: z.string().optional().default("consolidated-docs.md"),
+  maxTokens: z.number().optional().default(200000), // Approximately Claude 3.7 Sonnet's context window
+  includeFrontmatter: z.boolean().optional().default(true),
+  structureByFolders: z.boolean().optional().default(true),
+  includeTableOfContents: z.boolean().optional().default(true),
+});
