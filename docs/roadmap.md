@@ -2,7 +2,7 @@
 title: MCP Docs Manager Roadmap
 description: Development roadmap and planned features for the MCP Docs Manager
 author: Claude
-date: '2023-03-13T00:00:00.000Z'
+date: "2023-03-13T00:00:00.000Z"
 tags:
   - roadmap
   - planning
@@ -10,6 +10,7 @@ tags:
 status: published
 order: 2
 ---
+
 # MCP Docs Manager Roadmap
 
 This document outlines the development roadmap for the MCP Docs Manager service. It provides an overview of planned features, enhancements, and improvements.
@@ -74,6 +75,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - 📅 **Get Templates**: Get available document templates
 - 📅 **Create from Template**: Create new document from a template
 - 📅 **Bulk Operations**: Perform operations on multiple documents
+- 🔄 **LLM-Optimized Documentation**: Generate single-file documentation optimized for LLM context windows
 - 📅 **Version Control Integration**: Track document changes and history
 - 📅 **Documentation Analytics**: Track document usage and popularity
 - 📅 **Knowledge Base Analytics**: Track knowledge base usage and effectiveness

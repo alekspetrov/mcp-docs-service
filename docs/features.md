@@ -95,6 +95,14 @@ This document provides a comprehensive overview of the features available in the
 - **Semantic Search**: Implement semantic search using embeddings
 - **Knowledge Base Search**: Advanced search within generated knowledge bases
 
+### LLM-Optimized Documentation
+
+- **Single-File Generation**: Create a consolidated documentation file optimized for LLM context windows
+- **Context Window Adaptation**: Tailor documentation to fit specific LLM context limits (e.g., Claude 3.7 Sonnet)
+- **Intelligent Content Prioritization**: Organize content based on importance rather than navigation structure
+- **Token-Efficient Formatting**: Use specialized formatting to maximize information density within token constraints
+- **Reference System**: Implement a cross-referencing system designed for LLM navigation
+
 ### Templates and Advanced Features
 
 - **Get Templates**: Get available document templates
