@@ -2,7 +2,7 @@
 title: LLM-Optimized Documentation
 description: Guide to the LLM-Optimized Documentation feature for generating consolidated documentation optimized for AI consumption
 author: Claude
-date: '2024-03-20T00:00:00.000Z'
+date: "2024-03-21T00:00:00.000Z"
 tags:
   - guide
   - llm
@@ -15,7 +15,7 @@ order: 5
 
 ## Overview
 
-The LLM-Optimized Documentation feature allows you to generate a single consolidated markdown file containing your project's documentation, specifically formatted and optimized for Large Language Models (LLMs). This approach, inspired by Andrej Karpathy's insight that documentation should be designed for LLM consumption, creates a comprehensive resource that fits within an LLM's context window.
+The LLM-Optimized Documentation feature allows you to generate a single consolidated markdown file containing your project's documentation, specifically formatted and optimized for Large Language Models (LLMs). This approach, inspired by Andrej Karpathy's insight that documentation should be designed for LLM consumption, creates a comprehensive resource that fits within an LLM's context window. This feature is now available in version 0.6.0.
 
 ## Why Optimize Documentation for LLMs?
 
@@ -29,50 +29,56 @@ Traditional documentation is designed for human navigation through hyperlinked p
 
 ## Feature Specifications
 
-The LLM-Optimized Documentation feature will provide:
+The LLM-Optimized Documentation feature provides:
 
 ### Core Functionality
 
-- Generate a single markdown file from your entire documentation
-- Optimize content to fit within specified token limits (default: Claude 3.7 Sonnet's ~200K tokens)
-- Structure content for LLM comprehension rather than human navigation
-- Implement a reference system for cross-document relationships
-- Include a comprehensive table of contents with token estimates
+- Generates a single markdown file from your entire documentation
+- Optimizes content to fit within specified token limits (configurable with --max-tokens)
+- Structures content for LLM comprehension rather than human navigation
+- Maintains document organization by section
+- Includes a comprehensive table of contents with token estimates for each section
 
 ### Configuration Options
 
-- **Maximum Token Count**: Set the target context window size
-- **Output Location**: Specify where to save the generated file
-- **Include Frontmatter**: Option to include or exclude frontmatter metadata
-- **Structure By Folders**: Organize content based on folder structure or flatten
-- **Include Table of Contents**: Option to generate a detailed TOC
-- **Content Prioritization Rules**: Configure which content types have priority
+- **Maximum Token Count**: Set the target context window size with `--max-tokens`
+- **Output Location**: Specify where to save the generated file with `--output`
+- **Structure By Folders**: Organization is maintained based on folder structure
 
 ## Usage
 
-Once implemented, you'll be able to generate LLM-optimized documentation using:
+You can generate LLM-optimized documentation using either the CLI flag or the MCP tool:
+
+### CLI Usage
+
+```bash
+# Generate a consolidated document with defaults
+npx mcp-docs-service ./docs --single-doc
+
+# Generate with custom settings
+npx mcp-docs-service ./docs --single-doc --output api-docs.md --max-tokens 100000
+```
+
+### MCP Tool Usage
 
 ```
+# Using the MCP tool
 mcp_docs_manager_consolidate_documentation [options]
 ```
 
 ### Options
 
-- `basePath`: Base path within the docs directory (optional, default: "")
 - `outputPath`: Path to save the consolidated file (optional, default: "consolidated-docs.md")
 - `maxTokens`: Maximum token count (optional, default: 200000)
-- `includeFrontmatter`: Whether to include frontmatter (optional, default: true)
-- `structureByFolders`: Whether to structure by folders (optional, default: true)
-- `includeTableOfContents`: Whether to include a table of contents (optional, default: true)
 
 ### Example
 
 ```
-# Generate consolidated documentation for the entire docs directory
+# Generate consolidated documentation with default settings
 mcp_docs_manager_consolidate_documentation
 
-# Generate for a specific section with custom settings
-mcp_docs_manager_consolidate_documentation basePath="api" outputPath="api-docs.md" maxTokens=100000
+# Generate with custom settings
+mcp_docs_manager_consolidate_documentation outputPath="api-docs.md" maxTokens=100000
 ```
 
 ## Document Structure
@@ -102,6 +108,7 @@ The feature will be implemented with these components:
 ### 1. AI-Assisted Documentation Management
 
 Provide an AI assistant with complete documentation context in a single prompt, enabling it to:
+
 - Answer complex questions spanning multiple documentation sections
 - Suggest improvements with full context of relationships
 - Generate new documentation that maintains consistent style and references
@@ -109,6 +116,7 @@ Provide an AI assistant with complete documentation context in a single prompt, 
 ### 2. Project Onboarding
 
 Create a comprehensive project overview for new team members or contributors:
+
 - Single file containing all essential project information
 - Optimized for loading into an LLM for interactive exploration
 - Consistent structure that facilitates quick understanding
@@ -116,13 +124,14 @@ Create a comprehensive project overview for new team members or contributors:
 ### 3. Technical Support
 
 Provide support teams with a complete reference:
+
 - All troubleshooting information in one context
 - Cross-references between related issues and solutions
 - Optimized for AI-assisted support workflows
 
-## Implementation Timeline
+## Current Implementation
 
-This feature is currently under development as part of Phase 5 of our roadmap. We anticipate releasing an initial version in Q2 2024, with further refinements based on user feedback.
+This feature is available in version 0.6.0 and has been implemented as part of our roadmap. It includes the core functionality for generating consolidated documentation optimized for LLMs, with token counting and customizable output options.
 
 ## Providing Feedback
 

@@ -17,6 +17,7 @@ MCP Documentation Service is a Model Context Protocol (MCP) implementation for d
 - **List and Search**: Find documents by content or metadata
 - **Navigation Generation**: Create navigation structures from your documentation
 - **Health Checks**: Analyze documentation quality and identify issues like missing metadata or broken links
+- **LLM-Optimized Documentation**: Generate consolidated single-document output optimized for large language models
 - **MCP Integration**: Seamless integration with the Model Context Protocol
 - **Frontmatter Support**: Full support for YAML frontmatter in markdown documents
 - **Markdown Compatibility**: Works with standard markdown files
@@ -253,6 +254,28 @@ You can check the health of your documentation with:
 npx mcp-docs-service --health-check /path/to/docs
 ```
 
+### Consolidated Documentation for LLMs
+
+MCP Docs Service can generate a consolidated documentation file optimized for large language models. This feature is useful when you want to provide your entire documentation set to an LLM for context:
+
+```bash
+# Generate consolidated documentation with default filename (consolidated-docs.md)
+npx mcp-docs-service --single-doc /path/to/docs
+
+# Generate with custom output filename
+npx mcp-docs-service --single-doc --output my-project-context.md /path/to/docs
+
+# Limit the total tokens in the consolidated documentation
+npx mcp-docs-service --single-doc --max-tokens 100000 /path/to/docs
+```
+
+The consolidated output includes:
+
+- Project metadata (name, version, description)
+- Table of contents with token counts for each section
+- All documentation organized by section with clear separation
+- Token counting to help stay within LLM context limits
+
 ### Resilient by Default
 
 MCP Docs Service is designed to be resilient by default. The service automatically handles incomplete or poorly structured documentation without failing:
@@ -272,6 +295,13 @@ This makes the service particularly useful for:
 The service will always provide helpful feedback rather than failing, allowing you to incrementally improve your documentation over time.
 
 ## Version History
+
+### v0.6.0
+
+- Added LLM-optimized consolidated documentation feature (--single-doc flag)
+- Added token counting for each documentation section
+- Added consolidated document output customization (--output flag)
+- Added maximum token limit configuration (--max-tokens flag)
 
 ### v0.5.2
 

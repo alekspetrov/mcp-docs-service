@@ -75,7 +75,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - 📅 **Get Templates**: Get available document templates
 - 📅 **Create from Template**: Create new document from a template
 - 📅 **Bulk Operations**: Perform operations on multiple documents
-- 🔄 **LLM-Optimized Documentation**: Generate single-file documentation optimized for LLM context windows
+- ✅ **LLM-Optimized Documentation**: Generate single-file documentation optimized for LLM context windows using the `--single-doc` flag
 - 📅 **Version Control Integration**: Track document changes and history
 - 📅 **Documentation Analytics**: Track document usage and popularity
 - 📅 **Knowledge Base Analytics**: Track knowledge base usage and effectiveness
