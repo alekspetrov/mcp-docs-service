@@ -10,6 +10,7 @@ import { glob } from "glob";
 import { createTwoFilesPatch } from "diff";
 import { safeLog } from "../utils/logging.js";
 import { ToolResponse } from "../types/tools.js";
+import { minimatch } from "minimatch";
 
 // File editing and diffing utilities
 function normalizeLineEndings(text: string): string {
@@ -956,5 +957,350 @@ This is the documentation for ${folderName}.
         isError: true,
       };
     }
+  }
+
+  /**
+   * Generate a consolidated documentation file optimized for LLM consumption
+   */
+  async generateConsolidatedDocumentation(
+    basePath: string = "",
+    options: {
+      outputPath?: string;
+      maxTokens?: number;
+      includeFrontmatter?: boolean;
+      structureByFolders?: boolean;
+      includeTableOfContents?: boolean;
+      priorityFiles?: string[];
+      excludeFiles?: string[];
+    } = {}
+  ): Promise<ToolResponse> {
+    const {
+      outputPath = "consolidated-docs.md",
+      maxTokens = 200000,
+      includeFrontmatter = true,
+      structureByFolders = true,
+      includeTableOfContents = true,
+      priorityFiles = [],
+      excludeFiles = [],
+    } = options;
+
+    try {
+      // Validate the base path
+      const validBasePath = await this.validatePath(basePath || this.docsDir);
+
+      // Find all markdown files
+      const files = await glob("**/*.md", { cwd: validBasePath });
+
+      // Filter out excluded files
+      const filteredFiles = files.filter((file) => {
+        // Skip excluded files
+        for (const excludePattern of excludeFiles) {
+          if (minimatch(file, excludePattern)) {
+            return false;
+          }
+        }
+        return true;
+      });
+
+      // Sort files: priority files first, then by folder structure if requested
+      const sortedFiles = [...filteredFiles].sort((a, b) => {
+        // Priority files come first
+        const aIsPriority = priorityFiles.some((pattern) =>
+          minimatch(a, pattern)
+        );
+        const bIsPriority = priorityFiles.some((pattern) =>
+          minimatch(b, pattern)
+        );
+
+        if (aIsPriority && !bIsPriority) return -1;
+        if (!aIsPriority && bIsPriority) return 1;
+
+        // If structuring by folders, group files in the same folder
+        if (structureByFolders) {
+          const aDirname = path.dirname(a);
+          const bDirname = path.dirname(b);
+          if (aDirname !== bDirname) {
+            return aDirname.localeCompare(bDirname);
+          }
+        }
+
+        // README files come first within each folder
+        const aIsReadme = path.basename(a).toLowerCase() === "readme.md";
+        const bIsReadme = path.basename(b).toLowerCase() === "readme.md";
+
+        if (aIsReadme && !bIsReadme) return -1;
+        if (!aIsReadme && bIsReadme) return 1;
+
+        // Otherwise, sort alphabetically
+        return a.localeCompare(b);
+      });
+
+      // Generate project metadata from package.json if available
+      let projectMetadata: Record<string, any> = {};
+      try {
+        const packageJsonPath = path.join(process.cwd(), "package.json");
+        const packageJsonContent = await fs.readFile(packageJsonPath, "utf-8");
+        const packageJson = JSON.parse(packageJsonContent);
+
+        projectMetadata = {
+          name: packageJson.name || "Unknown Project",
+          version: packageJson.version || "0.0.0",
+          description: packageJson.description || "No description available",
+          repository:
+            typeof packageJson.repository === "string"
+              ? packageJson.repository
+              : packageJson.repository?.url || "Unknown repository",
+          license: packageJson.license || "Unknown license",
+        };
+      } catch (err) {
+        // If package.json can't be read, use minimal metadata
+        projectMetadata = {
+          name: path.basename(process.cwd()),
+          version: "0.0.0",
+          description: "Project documentation",
+        };
+      }
+
+      // Start building the consolidated document
+      let consolidatedContent = `# ${projectMetadata.name} Documentation ${
+        projectMetadata.version ? `[v${projectMetadata.version}]` : ""
+      }\n\n`;
+      consolidatedContent += `CONTEXT-TYPE: Technical Documentation\n`;
+      consolidatedContent += `TOKEN-COUNT: ~${maxTokens}\n`;
+      consolidatedContent += `LAST-UPDATED: ${
+        new Date().toISOString().split("T")[0]
+      }\n`;
+      consolidatedContent += `STRUCTURE-VERSION: 1.0\n\n`;
+
+      // Add metadata section
+      consolidatedContent += `## METADATA\n\n`;
+      consolidatedContent += `PROJECT-NAME: ${projectMetadata.name}\n`;
+      consolidatedContent += `VERSION: ${
+        projectMetadata.version || "Unknown"
+      }\n`;
+
+      if (projectMetadata.description) {
+        consolidatedContent += `DESCRIPTION: ${projectMetadata.description}\n`;
+      }
+
+      if (projectMetadata.repository) {
+        consolidatedContent += `REPOSITORY: ${projectMetadata.repository}\n`;
+      }
+
+      if (projectMetadata.license) {
+        consolidatedContent += `LICENSE: ${projectMetadata.license}\n`;
+      }
+
+      consolidatedContent += `\n`;
+
+      // Placeholder for table of contents
+      const tocPlaceholder = "## TABLE OF CONTENTS\n\n[TOC_PLACEHOLDER]\n\n";
+      consolidatedContent += tocPlaceholder;
+
+      // Process each file
+      const sections: Array<{
+        title: string;
+        id: string;
+        content: string;
+        tokenEstimate: number;
+      }> = [];
+
+      let totalTokens = this.estimateTokens(consolidatedContent);
+      let reachedTokenLimit = false;
+
+      for (const file of sortedFiles) {
+        if (reachedTokenLimit) break;
+
+        const filePath = path.join(validBasePath, file);
+        const content = await fs.readFile(filePath, "utf-8");
+
+        // Parse frontmatter
+        const { frontmatter, content: docContent } = parseFrontmatter(content);
+
+        // Skip files with status: draft if not specifically included in priority files
+        if (
+          frontmatter.status === "draft" &&
+          !priorityFiles.some((pattern) => minimatch(file, pattern))
+        ) {
+          continue;
+        }
+
+        // Extract title
+        const title = frontmatter.title || this.getTitleFromFilename(file);
+
+        // Generate section ID
+        const sectionId = this.generateSectionId(file, title);
+
+        // Process document content
+        let processedContent = "";
+
+        // Add section identifier
+        processedContent += `[SECTION-ID:${sectionId}]\n\n`;
+
+        // Include frontmatter as comments if requested
+        if (includeFrontmatter && Object.keys(frontmatter).length > 0) {
+          processedContent += `<!-- Frontmatter:\n`;
+          for (const [key, value] of Object.entries(frontmatter)) {
+            processedContent += `${key}: ${JSON.stringify(value)}\n`;
+          }
+          processedContent += `-->\n\n`;
+        }
+
+        // Add content
+        processedContent += docContent;
+
+        // Add file path reference
+        processedContent += `\n\n<!-- Source: ${file} -->\n\n`;
+
+        // Add horizontal rule between documents
+        processedContent += `---\n\n`;
+
+        // Estimate token count
+        const tokenEstimate = this.estimateTokens(processedContent);
+
+        // Check if adding this section would exceed the token limit
+        if (totalTokens + tokenEstimate > maxTokens) {
+          reachedTokenLimit = true;
+          continue;
+        }
+
+        // Add to total token count
+        totalTokens += tokenEstimate;
+
+        // Add to sections
+        sections.push({
+          title,
+          id: sectionId,
+          content: processedContent,
+          tokenEstimate,
+        });
+      }
+
+      // Generate table of contents
+      let toc = "";
+      let sectionNumber = 1;
+
+      for (const section of sections) {
+        const prefix = String(sectionNumber).padStart(2, "0");
+        toc += `${prefix}. [${section.title}](#${section.id}) (~${section.tokenEstimate} tokens)\n`;
+        sectionNumber++;
+      }
+
+      // Replace TOC placeholder
+      consolidatedContent = consolidatedContent.replace(
+        "[TOC_PLACEHOLDER]",
+        toc
+      );
+
+      // Add section contents
+      for (const section of sections) {
+        consolidatedContent += `## ${section.title}\n\n`;
+        consolidatedContent += section.content;
+      }
+
+      // Add end marker
+      consolidatedContent += `===== END OF DOCUMENTATION =====\n`;
+
+      // Write the consolidated document
+      const outputFullPath = path.isAbsolute(outputPath)
+        ? outputPath
+        : path.join(process.cwd(), outputPath);
+
+      await fs.writeFile(outputFullPath, consolidatedContent, "utf-8");
+
+      // Return success response
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Successfully generated consolidated documentation at ${outputPath}`,
+          },
+        ],
+        metadata: {
+          outputPath,
+          tokenCount: totalTokens,
+          sectionCount: sections.length,
+          fileCount: sortedFiles.length,
+          includedFileCount: sections.length,
+        },
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error generating consolidated documentation: ${errorMessage}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  }
+
+  /**
+   * Estimate token count for text
+   * This is a simple estimation method that can be refined
+   */
+  private estimateTokens(text: string): number {
+    // Claude-family estimation: ~3.5 characters per token as rough average
+    const avgCharsPerToken = 3.5;
+
+    // Remove markdown formatting that doesn't count much toward tokens
+    const strippedText = text.replace(/[#*_`\[\]()]/g, "");
+
+    // Estimate token count
+    return Math.ceil(strippedText.length / avgCharsPerToken);
+  }
+
+  /**
+   * Generate a section ID from a file path and title
+   */
+  private generateSectionId(filePath: string, title: string): string {
+    // Remove extension
+    const filePathWithoutExt = filePath.replace(/\.[^/.]+$/, "");
+
+    // Convert to kebab case
+    const kebabTitle = title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-");
+
+    // If the file is index.md or README.md, use the directory name
+    if (
+      path.basename(filePathWithoutExt).toLowerCase() === "index" ||
+      path.basename(filePathWithoutExt).toLowerCase() === "readme"
+    ) {
+      const dirName = path.basename(path.dirname(filePath));
+      return `${dirName}-${kebabTitle}`;
+    }
+
+    // Otherwise use the file name
+    return kebabTitle;
+  }
+
+  /**
+   * Extract title from filename
+   */
+  private getTitleFromFilename(filePath: string): string {
+    // Get the file name without extension
+    const basename = path.basename(filePath, path.extname(filePath));
+
+    // If it's index.md or README.md, use the directory name
+    if (
+      basename.toLowerCase() === "index" ||
+      basename.toLowerCase() === "readme"
+    ) {
+      return path
+        .basename(path.dirname(filePath))
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    // Otherwise, convert kebab-case to Title Case
+    return basename
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
   }
 }

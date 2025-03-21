@@ -108,4 +108,6 @@ export const ConsolidateDocumentationSchema = ToolInputSchema.extend({
   includeFrontmatter: z.boolean().optional().default(true),
   structureByFolders: z.boolean().optional().default(true),
   includeTableOfContents: z.boolean().optional().default(true),
+  priorityFiles: z.array(z.string()).optional(),
+  excludeFiles: z.array(z.string()).optional(),
 });
