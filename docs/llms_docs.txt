@@ -71,3 +71,250 @@ Configuration in .cursor/mcp.json:
 - description: Brief description
 - status: Document status (draft, published, etc.)
 - tags: Array of relevant tags
+
+# LLM Integration
+
+A comprehensive guide to integrating MCP Docs Manager with Large Language Models
+
+## Overview
+
+MCP Docs Manager provides specialized support for LLM integrations, enabling powerful documentation workflows, knowledge retrieval, and automated content management. This guide explains how to leverage MCP Docs Manager with language models.
+
+## Core capabilities
+
+### Documentation as context
+
+MCP Docs Manager enables LLMs to:
+
+- Access complete documentation repositories for context
+- Query specific documents or sections
+- Get structured metadata about document relationships
+- Retrieve up-to-date content without hallucination risks
+
+### Knowledge operations
+
+Key operations LLMs can perform:
+
+1. **Document retrieval**
+   - Fetch documents by path or metadata
+   - Search for relevant content
+   - Navigate document hierarchies
+
+2. **Content creation and modification**
+   - Generate new documentation
+   - Update existing content
+   - Fix issues identified by health checks
+   - Maintain consistent formatting
+
+3. **Knowledge analysis**
+   - Run documentation health checks
+   - Identify missing or outdated content
+   - Analyze documentation structure
+   - Track documentation coverage
+
+## Client support matrix
+
+| Client                 | Content Access | Content Creation | Health Analysis | Navigation | Notes                         |
+|------------------------|----------------|-----------------|----------------|------------|-------------------------------|
+| Claude Desktop         | ✅             | ✅              | ✅             | ✅         | Full support for all features |
+| Cursor                 | ✅             | ✅              | ✅             | ✅         | Native integration             |
+| Zed                    | ✅             | ✅              | ❌             | ❌         | Limited to basic operations    |
+| Custom LLM integrations| ✅             | ✅              | ✅             | ✅         | Via MCP SDK                    |
+
+## Implementation examples
+
+### Document retrieval workflow
+
+```javascript
+// Fetch project documentation structure
+const navResult = await mcp.callTool("docs-manager", "generate_navigation", {
+  basePath: "docs",
+  format: "tree"
+});
+
+// Fetch relevant document based on user query
+const searchResult = await mcp.callTool("docs-manager", "search_documents", {
+  basePath: "docs",
+  query: "authentication",
+  include_content: true
+});
+
+// Analyze specific document
+const docResult = await mcp.callTool("docs-manager", "read_document", {
+  path: searchResult.documents[0].path
+});
+```
+
+### Documentation improvement workflow
+
+```javascript
+// Check documentation health
+const healthResult = await mcp.callTool("docs-manager", "check_documentation_health", {
+  basePath: "docs"
+});
+
+// Fix identified issues
+if (healthResult.issues.length > 0) {
+  const issue = healthResult.issues[0];
+
+  if (issue.type === "missing_metadata") {
+    await mcp.callTool("docs-manager", "update_document_metadata", {
+      path: issue.path,
+      metadata: {
+        [issue.field]: "Generated value for " + issue.field
+      }
+    });
+  }
+}
+```
+
+### Knowledge base generation
+
+```javascript
+// Generate comprehensive knowledge base
+const kbResult = await mcp.callTool("docs-manager", "generate_knowledge_base", {
+  basePath: "docs",
+  categories: ["api", "guides"],
+  include_summary: true,
+  format: "markdown"
+});
+```
+
+## Best practices
+
+### 1. Context management
+
+- Use `search_documents` for targeted queries instead of loading all content
+- Leverage metadata to narrow document scope
+- Access navigation structure to understand document relationships
+- Prioritize most recent content when available
+
+### 2. Content generation
+
+- Maintain consistent formatting with existing documentation
+- Always include required metadata fields
+- Follow project-specific conventions
+- Link related documents properly
+- Use appropriate frontmatter structure
+
+### 3. Health maintenance
+
+- Run health checks before making recommendations
+- Identify and address documentation gaps
+- Validate links and references
+- Ensure consistent metadata usage
+- Follow tagging conventions
+
+## Common patterns
+
+### Knowledge extraction
+
+Extract specific information from documentation:
+
+```javascript
+// Extract API endpoints from documentation
+const apiDocs = await mcp.callTool("docs-manager", "search_documents", {
+  basePath: "docs/api",
+  include_content: true
+});
+
+// Parse and structure API information
+const endpoints = apiDocs.documents.map(doc => {
+  // Extract endpoint information
+  return {
+    path: extractPathFromDoc(doc.content),
+    methods: extractMethodsFromDoc(doc.content),
+    parameters: extractParametersFromDoc(doc.content)
+  };
+});
+```
+
+### Documentation creation
+
+Generate new documentation based on code or requirements:
+
+```javascript
+// Create new API documentation
+await mcp.callTool("docs-manager", "write_document", {
+  path: "docs/api/new-endpoint.md",
+  content: generateApiDocContent(endpoint),
+  metadata: {
+    title: `API: ${endpoint.name}`,
+    description: `Documentation for the ${endpoint.name} endpoint`,
+    status: "draft",
+    tags: ["api", endpoint.category]
+  }
+});
+```
+
+### Documentation validation
+
+Validate changes before committing:
+
+```javascript
+// Preview changes before saving
+const previewResult = await mcp.callTool("docs-manager", "preview_document_edit", {
+  path: "docs/guide.md",
+  content: updatedContent,
+  metadata: updatedMetadata
+});
+
+// Check for potential issues
+if (previewResult.warnings.length > 0) {
+  // Address warnings
+  const fixedContent = fixWarnings(updatedContent, previewResult.warnings);
+
+  // Save updated content
+  await mcp.callTool("docs-manager", "write_document", {
+    path: "docs/guide.md",
+    content: fixedContent,
+    metadata: updatedMetadata
+  });
+}
+```
+
+## Security considerations
+
+When integrating MCP Docs Manager with LLMs:
+
+1. **Content validation**
+   - Validate generated content before saving
+   - Check for potentially harmful content
+   - Verify formatting is appropriate
+
+2. **Access control**
+   - Limit write access to appropriate documentation areas
+   - Consider read-only access for sensitive sections
+   - Log document modifications
+
+3. **Content boundaries**
+   - Set clear limits on what the LLM can modify
+   - Provide specific paths for new content
+   - Use preview features before committing changes
+
+## Troubleshooting
+
+Common issues and solutions:
+
+1. **Content not found**
+   - Verify file paths are correct
+   - Check that documents exist in the specified location
+   - Ensure MCP service has access to the files
+
+2. **Metadata errors**
+   - Validate required metadata fields are included
+   - Check metadata format matches expectations
+   - Verify tags follow project conventions
+
+3. **Navigation issues**
+   - Regenerate navigation after significant changes
+   - Verify file structure follows project conventions
+   - Check for circular references
+
+## Getting started
+
+1. Connect to the MCP Docs Manager service
+2. Explore available documentation structure
+3. Read relevant documents to understand the project
+4. Run health checks to identify improvement areas
+5. Make targeted suggestions or improvements
