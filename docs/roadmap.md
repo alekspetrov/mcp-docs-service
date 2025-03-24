@@ -2,7 +2,7 @@
 title: MCP Docs Manager Roadmap
 description: Development roadmap and planned features for the MCP Docs Manager
 author: Claude
-date: '2023-03-13T00:00:00.000Z'
+date: "2023-03-13T00:00:00.000Z"
 tags:
   - roadmap
   - planning
@@ -10,6 +10,7 @@ tags:
 status: published
 order: 2
 ---
+
 # MCP Docs Manager Roadmap
 
 This document outlines the development roadmap for the MCP Docs Manager service. It provides an overview of planned features, enhancements, and improvements.
@@ -26,6 +27,19 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - Searching for documentation
 - Generating comprehensive knowledge bases for LLM context
 - MCP integration with proper response handling
+
+## Completed Tasks
+
+### Version 0.5.0
+
+- Project folder structure reorganization
+  - ✅ Cleaned up test files, organized into proper folders
+  - ✅ Improved directory structure and organization
+  - ✅ Added test README.md to explain structure
+- Core Functionality
+  - ✅ Basic documentation management
+  - ✅ Basic navigation generation
+  - ✅ Health check tools
 
 ## Planned Features
 
@@ -48,7 +62,7 @@ The MCP Docs Manager is currently in active development. The core functionality 
 - ✅ **Rename Document**: Rename documentation files while maintaining references
 - ✅ **Update Navigation Order**: Change the order of documents in navigation
 - ✅ **Create Section**: Add new navigation sections
-- 📅 **Batch Operations**: Support for batch document operations
+- ✅ **Batch Operations**: Support for batch document operations
 
 ### Phase 3: Documentation Health and Metadata (Q4 2023)
 
