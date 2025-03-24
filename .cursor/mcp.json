@@ -1,8 +1,10 @@
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "npx",
-      "args": ["-y", "mcp-docs-service", "./docs"]
+      "command": "node",
+      "args": ["dist/index.js", "./docs", "--single-doc"],
+      "description": "MCP Documentation Service v7.1.0 with interactive templates and token limiting",
+      "version": "7.1.0"
     }
   }
 }
