@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "docs-manager": {
-      "command": "node",
-      "args": ["dist/index.js", "./docs", "--single-doc"],
+      "command": "npx",
+      "args": ["mcp-docs-service@7.1.0", "./docs", "--single-doc"],
       "description": "MCP Documentation Service v7.1.0 with interactive templates and token limiting",
       "version": "7.1.0"
     }
