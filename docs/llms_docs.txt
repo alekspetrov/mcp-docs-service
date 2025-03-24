@@ -1,0 +1,73 @@
+# MCP DOCS MANAGER: QUICK REFERENCE FOR LLMs
+
+## OVERVIEW
+The MCP Docs Manager is a specialized service for managing documentation written in Markdown with frontmatter metadata. It integrates with the Model Context Protocol (MCP) to provide documentation management tools.
+
+## CORE FEATURES
+- Document CRUD: Read/write/edit/delete markdown files with frontmatter
+- Navigation generation: Build structured navigation for documentation
+- Health checks: Analyze documentation quality and completeness
+- Search: Find content or documents by metadata (tags, status, etc.)
+- Knowledge base generation: Format docs for LLM context
+
+## MCP PROTOCOL USAGE
+- Use `tools/list` method to see available tools
+- Use `tools/call` method to execute specific tools
+- Always follow JSON-RPC 2.0 specification for requests
+
+## COMMON TOOL PATTERNS
+
+### Reading a Document
+```javascript
+const result = await mcp.callTool("docs-manager", "read_document", {
+  path: "docs/example.md"
+});
+```
+
+### Writing a Document
+```javascript
+await mcp.callTool("docs-manager", "write_document", {
+  path: "docs/new-doc.md",
+  content: "# New Document\n\nThis is a new document.",
+  metadata: {
+    title: "New Document",
+    description: "A new document",
+    status: "draft"
+  }
+});
+```
+
+### Health Check
+```javascript
+const healthResult = await mcp.callTool("docs-manager", "check_documentation_health", {
+  basePath: "docs"
+});
+console.log(`Health Score: ${healthResult.metadata.score}%`);
+```
+
+### Generate Navigation
+```javascript
+const navResult = await mcp.callTool("docs-manager", "generate_navigation", {
+  basePath: "docs",
+  output: "docs/navigation.json"
+});
+```
+
+## INTEGRATION IN CURSOR/CLAUDE
+Configuration in .cursor/mcp.json:
+```json
+{
+  "mcpServers": {
+    "docs-manager": {
+      "command": "node",
+      "args": ["path/to/mcp-docs-service/dist/index.js", "path/to/your/docs"]
+    }
+  }
+}
+```
+
+## REQUIRED METADATA
+- title: Document title
+- description: Brief description
+- status: Document status (draft, published, etc.)
+- tags: Array of relevant tags
