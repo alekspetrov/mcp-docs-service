@@ -30,3 +30,11 @@ coverage/
 logs/
 *.log
 .qodo
+
+# Testing
+tests/logs/
+tests/temp-data/
+temp-publish/
+
+# macOS
+.DS_Store

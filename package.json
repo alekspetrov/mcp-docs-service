@@ -20,8 +20,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:integration": "node tests/integration/test-single-doc.js",
+    "test:clients": "node tests/clients/test-all-tools.js",
     "prepublishOnly": "npm run build",
-    "prepare-publish": "node scripts/prepare-publish.js"
+    "prepare-publish": "node scripts/prepare-publish.js",
+    "clean": "rm -rf dist coverage temp-publish"
   },
   "keywords": [
     "mcp",
