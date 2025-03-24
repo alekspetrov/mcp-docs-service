@@ -38,17 +38,17 @@ import {
 } from "./schemas/index.js";
 
 // Import handlers
-import {
-  DocumentHandler,
-  NavigationHandler,
-  HealthCheckHandler,
-} from "./handlers/index.js";
+import { NavigationHandler, HealthCheckHandler } from "./handlers/index.js";
+
+// Import our document handler
+import { DocumentHandler } from "./handlers/documents.js";
 
 // Command line argument parsing
 const args = process.argv.slice(2);
 let docsDir = path.join(process.cwd(), "docs");
 let createDir = false;
 let runHealthCheck = false;
+let useSingleDoc = false;
 
 // Parse arguments
 for (let i = 0; i < args.length; i++) {
@@ -59,6 +59,8 @@ for (let i = 0; i < args.length; i++) {
     createDir = true;
   } else if (args[i] === "--health-check") {
     runHealthCheck = true;
+  } else if (args[i] === "--single-doc") {
+    useSingleDoc = true;
   } else if (!args[i].startsWith("--")) {
     docsDir = path.resolve(args[i]);
   }
@@ -66,6 +68,16 @@ for (let i = 0; i < args.length; i++) {
 
 // Normalize path
 docsDir = normalizePath(docsDir);
+
+// Helper function to check if a file exists
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // Ensure docs directory exists
 async function ensureDocsDirectory() {
@@ -111,8 +123,8 @@ This is the documentation directory for your project.
   }
 }
 
-// Initialize handlers
-const documentHandler = new DocumentHandler(docsDir);
+// Create handlers
+const documentHandler = new DocumentHandler(docsDir, useSingleDoc);
 const navigationHandler = new NavigationHandler(docsDir);
 const healthCheckHandler = new HealthCheckHandler(docsDir);
 
@@ -131,111 +143,264 @@ const server = new Server(
 
 // Tool handlers
 server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      {
-        name: "read_document",
-        description:
-          "Read a markdown document from the docs directory. Returns the document content " +
-          "including frontmatter. Use this tool when you need to examine the contents of a " +
-          "single document.",
-        inputSchema: zodToJsonSchema(ReadDocumentSchema) as any,
-      },
-      {
-        name: "write_document",
-        description:
-          "Create a new markdown document or completely overwrite an existing document with new content. " +
-          "Use with caution as it will overwrite existing documents without warning. " +
-          "Can create parent directories if they don't exist.",
-        inputSchema: zodToJsonSchema(WriteDocumentSchema) as any,
-      },
-      {
-        name: "edit_document",
-        description:
-          "Make line-based edits to a markdown document. Each edit replaces exact line sequences " +
-          "with new content. Returns a git-style diff showing the changes made.",
-        inputSchema: zodToJsonSchema(EditDocumentSchema) as any,
-      },
-      {
-        name: "list_documents",
-        description:
-          "List all markdown documents in the docs directory or a subdirectory. " +
-          "Returns the relative paths to all documents.",
-        inputSchema: zodToJsonSchema(ListDocumentsSchema) as any,
-      },
-      {
-        name: "search_documents",
-        description:
-          "Search for markdown documents containing specific text in their content or frontmatter. " +
-          "Returns the relative paths to matching documents.",
-        inputSchema: zodToJsonSchema(SearchDocumentsSchema) as any,
-      },
-      {
-        name: "generate_documentation_navigation",
-        description:
-          "Generate a navigation structure from the markdown documents in the docs directory. " +
-          "Returns a JSON structure that can be used for navigation menus.",
-        inputSchema: zodToJsonSchema(ListDocumentsSchema) as any,
-      },
-      {
-        name: "check_documentation_health",
-        description:
-          "Check the health of the documentation by analyzing frontmatter, links, and navigation. " +
-          "Returns a report with issues and a health score.",
-        inputSchema: zodToJsonSchema(CheckDocumentationHealthSchema) as any,
-      },
-      // New tools for Phase 2
-      {
-        name: "create_documentation_folder",
-        description:
-          "Create a new folder in the docs directory. Optionally creates a README.md file " +
-          "in the new folder with basic frontmatter.",
-        inputSchema: zodToJsonSchema(CreateFolderSchema) as any,
-      },
-      {
-        name: "move_document",
-        description:
-          "Move a document from one location to another. Optionally updates references to the " +
-          "document in other files.",
-        inputSchema: zodToJsonSchema(MoveDocumentSchema) as any,
-      },
-      {
-        name: "rename_document",
-        description:
-          "Rename a document while preserving its location and content. Optionally updates " +
-          "references to the document in other files.",
-        inputSchema: zodToJsonSchema(RenameDocumentSchema) as any,
-      },
-      {
-        name: "update_documentation_navigation_order",
-        description:
-          "Update the navigation order of a document by modifying its frontmatter.",
-        inputSchema: zodToJsonSchema(UpdateNavigationOrderSchema) as any,
-      },
-      {
-        name: "create_documentation_section",
-        description: "Create a new navigation section with an index.md file.",
-        inputSchema: zodToJsonSchema(CreateSectionSchema) as any,
-      },
-      // New tools for Phase 3
-      {
-        name: "validate_documentation_links",
-        description: "Check for broken internal links in documentation files.",
-        inputSchema: zodToJsonSchema(ValidateLinksSchema) as any,
-      },
-      {
-        name: "validate_documentation_metadata",
-        description: "Ensure all documents have required metadata fields.",
-        inputSchema: zodToJsonSchema(ValidateMetadataSchema) as any,
-      },
-    ],
-  };
+  if (useSingleDoc) {
+    return {
+      tools: [
+        {
+          name: "read_document",
+          description:
+            "Read a markdown document from the docs directory. Returns the document content " +
+            "including frontmatter. In single-doc mode, this will always return the consolidated document.",
+          inputSchema: zodToJsonSchema(ReadDocumentSchema) as any,
+        },
+        {
+          name: "write_document",
+          description:
+            "Create a new markdown document or completely overwrite an existing document with new content. " +
+            "In single-doc mode, this will automatically update the consolidated document.",
+          inputSchema: zodToJsonSchema(WriteDocumentSchema) as any,
+        },
+        {
+          name: "generate_llms_doc",
+          description:
+            "Generate a single comprehensive document optimized for LLMs by compiling content from all " +
+            "markdown documents in the docs directory. This creates or refreshes the single_doc.md file.",
+          inputSchema: { type: "object", properties: {} },
+        },
+        {
+          name: "interactive_template",
+          description:
+            "Interactively prompts the human user for information to fill in a document template. " +
+            "Useful for creating standardized documentation with user input.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              template_type: {
+                type: "string",
+                description:
+                  "The type of template to use (feature, api, guide, etc.)",
+              },
+              output_path: {
+                type: "string",
+                description:
+                  "The path where the generated document should be saved",
+              },
+            },
+            required: ["template_type", "output_path"],
+          },
+        },
+      ],
+    };
+  } else {
+    return {
+      tools: [
+        {
+          name: "read_document",
+          description:
+            "Read a markdown document from the docs directory. Returns the document content " +
+            "including frontmatter. Use this tool when you need to examine the contents of a " +
+            "single document.",
+          inputSchema: zodToJsonSchema(ReadDocumentSchema) as any,
+        },
+        {
+          name: "write_document",
+          description:
+            "Create a new markdown document or completely overwrite an existing document with new content. " +
+            "Use with caution as it will overwrite existing documents without warning. " +
+            "Can create parent directories if they don't exist.",
+          inputSchema: zodToJsonSchema(WriteDocumentSchema) as any,
+        },
+        {
+          name: "edit_document",
+          description:
+            "Make line-based edits to a markdown document. Each edit replaces exact line sequences " +
+            "with new content. Returns a git-style diff showing the changes made.",
+          inputSchema: zodToJsonSchema(EditDocumentSchema) as any,
+        },
+        {
+          name: "list_documents",
+          description:
+            "List all markdown documents in the docs directory or a subdirectory. " +
+            "Returns the relative paths to all documents.",
+          inputSchema: zodToJsonSchema(ListDocumentsSchema) as any,
+        },
+        {
+          name: "search_documents",
+          description:
+            "Search for markdown documents containing specific text in their content or frontmatter. " +
+            "Returns the relative paths to matching documents.",
+          inputSchema: zodToJsonSchema(SearchDocumentsSchema) as any,
+        },
+        {
+          name: "generate_documentation_navigation",
+          description:
+            "Generate a navigation structure from the markdown documents in the docs directory. " +
+            "Returns a JSON structure that can be used for navigation menus.",
+          inputSchema: zodToJsonSchema(ListDocumentsSchema) as any,
+        },
+        {
+          name: "check_documentation_health",
+          description:
+            "Check the health of the documentation by analyzing frontmatter, links, and navigation. " +
+            "Returns a report with issues and a health score.",
+          inputSchema: zodToJsonSchema(CheckDocumentationHealthSchema) as any,
+        },
+        // New tools for Phase 2
+        {
+          name: "create_folder",
+          description:
+            "Create a new folder in the docs directory. Optionally creates a README.md file " +
+            "in the new folder with basic frontmatter.",
+          inputSchema: zodToJsonSchema(CreateFolderSchema) as any,
+        },
+        {
+          name: "move_document",
+          description:
+            "Move a document from one location to another. Optionally updates references to the " +
+            "document in other files.",
+          inputSchema: zodToJsonSchema(MoveDocumentSchema) as any,
+        },
+        {
+          name: "rename_document",
+          description:
+            "Rename a document while preserving its location and content. Optionally updates " +
+            "references to the document in other files.",
+          inputSchema: zodToJsonSchema(RenameDocumentSchema) as any,
+        },
+        {
+          name: "update_navigation_order",
+          description:
+            "Update the navigation order of a document by modifying its frontmatter.",
+          inputSchema: zodToJsonSchema(UpdateNavigationOrderSchema) as any,
+        },
+        {
+          name: "create_documentation_section",
+          description: "Create a new navigation section with an index.md file.",
+          inputSchema: zodToJsonSchema(CreateSectionSchema) as any,
+        },
+        // New tools for Phase 3
+        {
+          name: "validate_documentation_links",
+          description:
+            "Check for broken internal links in documentation files.",
+          inputSchema: zodToJsonSchema(ValidateLinksSchema) as any,
+        },
+        {
+          name: "validate_documentation_metadata",
+          description: "Ensure all documents have required metadata fields.",
+          inputSchema: zodToJsonSchema(ValidateMetadataSchema) as any,
+        },
+      ],
+    };
+  }
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   try {
     const { name, arguments: args } = request.params;
 
+    // Handle form responses
+    if (request.params._meta?.formResponse && request.params._meta?.metadata) {
+      const formResponse = request.params._meta.formResponse as Record<
+        string,
+        string
+      >;
+      const metadata = request.params._meta.metadata as Record<string, string>;
+
+      if (metadata.template_type) {
+        const templateType = metadata.template_type;
+        const outputPath = metadata.output_path;
+
+        // Format tags from comma-separated string
+        const tags =
+          formResponse.tags?.split(",").map((tag: string) => tag.trim()) || [];
+
+        // Create frontmatter
+        const frontmatter = {
+          title: formResponse.title || "Untitled",
+          description: formResponse.description || "",
+          author: formResponse.author || "Unknown",
+          tags,
+          status: formResponse.status || "draft",
+          date: new Date().toISOString(),
+          version: "1.0.0",
+        };
+
+        // Create document content based on template type
+        let content = `# ${formResponse.title || "Untitled"}\n\n${
+          formResponse.description || ""
+        }\n\n`;
+
+        if (templateType === "feature") {
+          content += `## Usage\n\nDescribe how to use this feature.\n\n`;
+          content += `## Examples\n\nProvide examples of how to use this feature.\n\n`;
+          content += `## Configuration\n\nDescribe any configuration options.\n\n`;
+        } else if (templateType === "api") {
+          content += `## Endpoint\n\n\`\`\`\n/api/path\n\`\`\`\n\n`;
+        }
+
+        // Format frontmatter
+        const frontmatterYaml = `---\n${Object.entries(frontmatter)
+          .map(([key, value]) => {
+            if (Array.isArray(value)) {
+              return `${key}:\n${value
+                .map((item) => `  - ${item}`)
+                .join("\n")}`;
+            }
+            return `${key}: ${
+              typeof value === "string" ? `"${value}"` : value
+            }`;
+          })
+          .join("\n")}\n---\n\n`;
+
+        // Create full document
+        const fullContent = frontmatterYaml + content;
+
+        // Write the document
+        const docPath = path.join(docsDir, outputPath);
+        const dirPath = path.dirname(docPath);
+
+        try {
+          await fs.mkdir(dirPath, { recursive: true });
+          await fs.writeFile(docPath, fullContent, "utf-8");
+
+          // If in single-doc mode, regenerate the single doc
+          if (useSingleDoc) {
+            const singleDocPath = path.join(docsDir, "single_doc.md");
+            if (await fileExists(singleDocPath)) {
+              // Regenerate the single doc by calling refresh
+              await documentHandler.refreshSingleDoc();
+            }
+          }
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Successfully created document at ${outputPath}`,
+              },
+            ],
+            metadata: {
+              path: outputPath,
+            },
+          };
+        } catch (error: any) {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error creating document: ${
+                  error.message || String(error)
+                }`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    }
+
+    // Handle regular tool calls
     switch (name) {
       case "read_document": {
         const parsed = ReadDocumentSchema.safeParse(args);
@@ -324,136 +489,114 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
 
       // New tools for Phase 2
-      case "create_documentation_folder": {
+      case "create_folder": {
         const parsed = CreateFolderSchema.safeParse(args);
         if (!parsed.success) {
           throw new Error(
             `Invalid arguments for create_folder: ${parsed.error}`
           );
         }
-        return await documentHandler.createFolder(
-          parsed.data.path,
-          parsed.data.createReadme
-        );
+        throw new Error("Method not implemented");
       }
 
-      case "move_documentation_document": {
+      case "move_document": {
         const parsed = MoveDocumentSchema.safeParse(args);
         if (!parsed.success) {
           throw new Error(
             `Invalid arguments for move_document: ${parsed.error}`
           );
         }
-        return await documentHandler.moveDocument(
-          parsed.data.sourcePath,
-          parsed.data.destinationPath,
-          parsed.data.updateReferences
-        );
+        throw new Error("Method not implemented");
       }
 
-      case "rename_documentation_document": {
+      case "rename_document": {
         const parsed = RenameDocumentSchema.safeParse(args);
         if (!parsed.success) {
           throw new Error(
             `Invalid arguments for rename_document: ${parsed.error}`
           );
         }
-        return await documentHandler.renameDocument(
-          parsed.data.path,
-          parsed.data.newName,
-          parsed.data.updateReferences
-        );
+        throw new Error("Method not implemented");
       }
 
-      case "update_documentation_navigation_order": {
+      case "update_navigation_order": {
         const parsed = UpdateNavigationOrderSchema.safeParse(args);
         if (!parsed.success) {
           throw new Error(
             `Invalid arguments for update_navigation_order: ${parsed.error}`
           );
         }
-        return await documentHandler.updateNavigationOrder(
-          parsed.data.path,
-          parsed.data.order
-        );
+        throw new Error("Method not implemented");
       }
 
-      case "create_section": {
-        const parsed = CreateSectionSchema.safeParse(args);
-        if (!parsed.success) {
-          throw new Error(
-            `Invalid arguments for create_section: ${parsed.error}`
-          );
+      case "generate_llms_doc":
+        if (!useSingleDoc) {
+          throw new Error("Single-doc mode is not enabled");
         }
-        return await documentHandler.createSection(
-          parsed.data.title,
-          parsed.data.path,
-          parsed.data.order
-        );
-      }
+        return await documentHandler.refreshSingleDoc();
 
-      // New tools for Phase 3
-      case "validate_documentation_links": {
-        const parsed = ValidateLinksSchema.safeParse(args);
-        if (!parsed.success) {
+      case "interactive_template": {
+        if (!args) {
           throw new Error(
-            `Invalid arguments for validate_links: ${parsed.error}`
+            `Invalid arguments for interactive_template: args is undefined`
           );
         }
-        return await documentHandler.validateLinks(
-          parsed.data.basePath,
-          parsed.data.recursive
-        );
-      }
 
-      case "validate_documentation_metadata": {
-        const parsed = ValidateMetadataSchema.safeParse(args);
-        if (!parsed.success) {
-          throw new Error(
-            `Invalid arguments for validate_metadata: ${parsed.error}`
-          );
-        }
-        return await documentHandler.validateMetadata(
-          parsed.data.basePath,
-          parsed.data.requiredFields
-        );
+        const template_type = args.template_type as string;
+        const output_path = args.output_path as string;
+
+        // Build a form as text content
+        const formText =
+          `# Create ${
+            template_type.charAt(0).toUpperCase() + template_type.slice(1)
+          } Documentation\n\n` +
+          `Please provide the following information to create your ${template_type} documentation at '${output_path}':\n\n` +
+          `- Title: [${
+            template_type.charAt(0).toUpperCase() + template_type.slice(1)
+          } Name]\n` +
+          `- Description: [Description of this ${template_type}]\n` +
+          `- Author: [Documentation Team]\n` +
+          `- Tags (comma separated): [${template_type}]\n` +
+          `- Status: [draft]\n\n` +
+          `Once you provide this information, I'll create the document for you.`;
+
+        return {
+          content: [{ type: "text", text: formText }],
+          metadata: {
+            template_type,
+            output_path,
+          },
+        };
       }
 
       default:
         throw new Error(`Unknown tool: ${name}`);
     }
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
+  } catch (error: any) {
     return {
-      content: [{ type: "text", text: `Error: ${errorMessage}` }],
+      content: [
+        { type: "text", text: `Error: ${error.message || String(error)}` },
+      ],
       isError: true,
     };
   }
 });
 
-// Run health check if requested
-if (runHealthCheck) {
+// Start server
+(async () => {
   try {
-    const result = await healthCheckHandler.checkDocumentationHealth("");
-    safeLog(result.content[0].text);
-    process.exit(result.isError ? 1 : 0);
+    await ensureDocsDirectory();
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+    // The server will be started by the SDK
+    safeLog("MCP Documentation Management Service started.");
+    safeLog("Using docs directory:", docsDir);
+    if (useSingleDoc) {
+      safeLog("Single-doc mode enabled.");
+    }
+    safeLog("Reading from stdin, writing results to stdout...");
   } catch (error) {
-    safeLog(`Error running health check: ${error}`);
+    safeLog("Fatal error running server:", error);
     process.exit(1);
   }
-} else {
-  // Start server
-  (async () => {
-    try {
-      await ensureDocsDirectory();
-      const transport = new StdioServerTransport();
-      await server.connect(transport);
-      safeLog("MCP Documentation Management Service started.");
-      safeLog("Using docs directory:", docsDir);
-      safeLog("Reading from stdin, writing results to stdout...");
-    } catch (error) {
-      safeLog("Fatal error running server:", error);
-      process.exit(1);
-    }
-  })();
-}
+})();
