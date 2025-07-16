@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/alekspetrov-mcp-docs-service-badge.png)](https://mseep.ai/app/alekspetrov-mcp-docs-service)
+
 # MCP Documentation Service
 
 [![Test Coverage](https://codecov.io/gh/alekspetrov/mcp-docs-service/branch/main/graph/badge.svg)](https://codecov.io/gh/alekspetrov/mcp-docs-service)
