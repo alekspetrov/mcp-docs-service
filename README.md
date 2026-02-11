@@ -75,6 +75,9 @@ To use MCP Docs Service with Claude Desktop:
     "docs-manager": {
       "command": "npx",
       "args": ["-y", "mcp-docs-service", "/path/to/your/docs"]
+      "env": {
+        "MCP_NPX_WRAPPER": true
+      }
     }
   }
 }
